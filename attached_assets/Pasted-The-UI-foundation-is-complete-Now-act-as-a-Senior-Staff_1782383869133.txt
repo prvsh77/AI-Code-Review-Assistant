@@ -1,0 +1,550 @@
+The UI foundation is complete.
+
+Now act as a Senior Staff Product Designer and Frontend Engineer.
+
+DO NOT create any new pages.
+
+Instead, improve every existing page until it looks like a polished enterprise SaaS product comparable to GitHub, Cursor, CodeRabbit, Linear, Vercel and Stripe.
+
+The application should no longer feel like a dashboard template.
+
+---
+
+## Overall Design Improvements
+
+Improve
+
+• spacing
+• typography
+• hierarchy
+• animations
+• responsiveness
+• micro interactions
+• visual consistency
+
+Replace every placeholder component with production-quality UI.
+
+Use
+
+* React
+* TypeScript
+* TailwindCSS
+* shadcn/ui
+* Framer Motion
+* Lucide Icons
+
+---
+
+# Navigation
+
+Redesign the sidebar.
+
+Make it look premium.
+
+Include
+
+AI Code Review logo
+
+Dashboard
+
+Repositories
+
+Pull Requests
+
+AI Reviews
+
+Security
+
+Analytics
+
+Documentation
+
+History
+
+Settings
+
+Profile
+
+Collapse button
+
+Notification badge
+
+Workspace selector
+
+---
+
+# Top Navigation
+
+Create a sticky top navbar.
+
+Include
+
+Repository selector
+
+Global search
+
+Recent activity
+
+Notifications
+
+GitHub sync status
+
+Theme switch
+
+User avatar dropdown
+
+---
+
+# Dashboard Improvements
+
+Replace static cards with beautiful metric cards.
+
+Each card should include
+
+icon
+
+trend indicator
+
+percentage change
+
+sparkline
+
+hover animation
+
+Examples
+
+Overall Score
+
+Repositories
+
+Pull Requests
+
+Security Findings
+
+Coverage
+
+Review Time
+
+Below cards create
+
+Quality Trend
+
+Security Trend
+
+Repository Activity
+
+Language Breakdown
+
+Recent Reviews
+
+Recent AI Suggestions
+
+---
+
+# Repository Page
+
+Redesign cards.
+
+Each repository card should contain
+
+Repository icon
+
+Language badge
+
+Stars
+
+Forks
+
+Last commit
+
+Contributors
+
+Coverage
+
+AI Quality Score
+
+Open PR count
+
+Animated Review button
+
+Hover elevation
+
+---
+
+# Pull Request Page
+
+Each PR should become a rich card.
+
+Include
+
+Author avatar
+
+Branch
+
+Commit count
+
+Files changed
+
+Insertions
+
+Deletions
+
+Estimated review time
+
+Risk score
+
+AI status
+
+Review progress
+
+Action buttons
+
+Review
+
+View Diff
+
+Approve
+
+---
+
+# AI Analysis Page
+
+Create a premium loading experience.
+
+Show every AI agent as an animated card.
+
+Reviewer Agent
+
+Security Agent
+
+Complexity Agent
+
+Documentation Agent
+
+Refactoring Agent
+
+Each card should display
+
+Status
+
+Elapsed time
+
+Current task
+
+Files analyzed
+
+Progress animation
+
+Connect the cards using an animated workflow.
+
+---
+
+# Review Dashboard
+
+This is the most important page.
+
+Completely redesign it.
+
+Top
+
+Overall AI Score
+
+Security Score
+
+Performance Score
+
+Complexity
+
+Maintainability
+
+Middle
+
+Interactive issue summary
+
+Severity chart
+
+Timeline
+
+Files reviewed
+
+Bottom
+
+GitHub-like diff viewer
+
+Inline comments
+
+Suggested fixes
+
+Accept suggestion button
+
+Reject suggestion button
+
+AI explanation drawer
+
+---
+
+# Code Viewer
+
+Use Monaco Editor.
+
+Add
+
+syntax highlighting
+
+inline comments
+
+line decorations
+
+AI badges
+
+hover tooltips
+
+code minimap
+
+split diff mode
+
+collapsible folders
+
+search
+
+---
+
+# Security Page
+
+Look similar to Snyk.
+
+Include
+
+OWASP chart
+
+Severity distribution
+
+Attack vectors
+
+Risk matrix
+
+Issue timeline
+
+Interactive issue table
+
+CVE references
+
+Filters
+
+Export report
+
+---
+
+# Analytics
+
+Make it executive-level.
+
+Charts
+
+Quality score over time
+
+Average review duration
+
+Repository comparison
+
+Technical debt
+
+Complexity heatmap
+
+Top risky repositories
+
+Language distribution
+
+Monthly trends
+
+---
+
+# Documentation
+
+Transform into a documentation portal.
+
+Left
+
+Navigation tree
+
+Middle
+
+Markdown preview
+
+Right
+
+Table of contents
+
+Buttons
+
+Export PDF
+
+Export Markdown
+
+Copy
+
+Share
+
+---
+
+# Profile
+
+Modern profile layout.
+
+Avatar
+
+GitHub stats
+
+Repositories
+
+Reviews completed
+
+Achievements
+
+Activity graph
+
+Contribution calendar
+
+Recent activity
+
+---
+
+# History
+
+Timeline layout instead of table.
+
+Every review should display
+
+Repository
+
+Score
+
+Issues
+
+Security findings
+
+Duration
+
+Date
+
+Status
+
+---
+
+# Empty States
+
+Every page should have beautiful empty states with custom illustrations.
+
+---
+
+# Animations
+
+Use Framer Motion.
+
+Animate
+
+Cards
+
+Charts
+
+Sidebar
+
+Navigation
+
+Tables
+
+Progress bars
+
+Buttons
+
+Page transitions
+
+Loading skeletons
+
+Hover effects
+
+---
+
+# Charts
+
+Replace simple charts with polished Recharts.
+
+Rounded lines
+
+Smooth curves
+
+Animated loading
+
+Interactive tooltips
+
+---
+
+# Icons
+
+Replace every emoji.
+
+Use Lucide Icons consistently.
+
+---
+
+# Components
+
+Create reusable components for everything.
+
+MetricCard
+
+ChartCard
+
+IssueCard
+
+ReviewCard
+
+RepositoryCard
+
+AgentCard
+
+Timeline
+
+ActivityFeed
+
+NotificationCard
+
+QualityBadge
+
+RiskBadge
+
+ProgressRing
+
+CodeAnnotation
+
+---
+
+# Responsiveness
+
+Perfect support for
+
+Desktop
+
+Tablet
+
+Mobile
+
+---
+
+# Theme
+
+Clean white interface.
+
+Subtle gray background.
+
+Rounded 16px cards.
+
+Soft shadows.
+
+Blue primary accent.
+
+Professional enterprise appearance.
+
+---
+
+The final result should resemble a commercial SaaS product that could realistically compete with CodeRabbit or SonarQube, rather than a generated admin dashboard.

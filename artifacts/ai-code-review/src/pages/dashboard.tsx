@@ -2,12 +2,31 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useGetDashboardStats, getGetDashboardStatsQueryKey, useGetQualityTrend, getGetQualityTrendQueryKey, useGetLanguageBreakdown, getGetLanguageBreakdownQueryKey, useListReviews, getListReviewsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FolderGit2, GitPullRequest, FileCode2, Activity, AlertTriangle } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
+import { FolderGit2, GitPullRequest, FileCode2, Activity, ShieldAlert, Zap, BookOpen, AlertTriangle } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
+import { MetricCard } from "@/components/ui/metric-card";
+import { ScoreRing } from "@/components/ui/score-ring";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+};
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats({ query: { queryKey: getGetDashboardStatsQueryKey() } });
@@ -16,66 +35,66 @@ export default function Dashboard() {
   const { data: reviews, isLoading: reviewsLoading } = useListReviews({ limit: 5 }, { query: { queryKey: getListReviewsQueryKey({ limit: 5 }) } });
 
   const scoreColor = (score: number) => {
-    if (score >= 90) return "text-green-500";
-    if (score >= 70) return "text-yellow-500";
-    return "text-destructive";
+    if (score >= 85) return "bg-green-500/10 text-green-500 border-green-500/20";
+    if (score >= 70) return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+    return "bg-red-500/10 text-red-500 border-red-500/20";
   };
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground font-mono">Overview</h1>
-          <p className="text-muted-foreground">Monitor your team's code quality and AI review metrics.</p>
-        </div>
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+        <motion.div variants={item} className="flex justify-between items-end">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground font-mono">Good morning, John</h1>
+            <p className="text-muted-foreground">{format(new Date(), 'EEEE, MMMM do, yyyy')}</p>
+          </div>
+          <button className="px-4 py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors shadow-sm text-sm">
+            Sync Now
+          </button>
+        </motion.div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-card/50 border-border/50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Repositories</CardTitle>
-              <FolderGit2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? <Skeleton className="h-7 w-20" /> : <div className="text-2xl font-bold">{stats?.totalRepositories}</div>}
-            </CardContent>
-          </Card>
-          <Card className="bg-card/50 border-border/50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pull Requests</CardTitle>
-              <GitPullRequest className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? <Skeleton className="h-7 w-20" /> : <div className="text-2xl font-bold">{stats?.totalPullRequests}</div>}
-            </CardContent>
-          </Card>
-          <Card className="bg-card/50 border-border/50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Files Reviewed</CardTitle>
-              <FileCode2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? <Skeleton className="h-7 w-20" /> : <div className="text-2xl font-bold">{stats?.filesReviewed}</div>}
-            </CardContent>
-          </Card>
-          <Card className="bg-card/50 border-border/50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overall Score</CardTitle>
-              <Activity className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? (
-                <Skeleton className="h-7 w-20" />
-              ) : (
-                <div className={`text-2xl font-bold ${scoreColor(stats?.overallScore || 0)}`}>{stats?.overallScore}/100</div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <motion.div variants={item} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <MetricCard 
+            title="Total Repositories" 
+            value={statsLoading ? "-" : stats?.totalRepositories || 0} 
+            icon={FolderGit2} 
+            trend={12} 
+            color="primary"
+            trendLabel="this week"
+          />
+          <MetricCard 
+            title="Pull Requests" 
+            value={statsLoading ? "-" : stats?.totalPullRequests || 0} 
+            icon={GitPullRequest} 
+            trend={5} 
+            color="blue"
+            trendLabel="this week"
+          />
+          <MetricCard 
+            title="Files Reviewed" 
+            value={statsLoading ? "-" : stats?.filesReviewed || 0} 
+            icon={FileCode2} 
+            trend={-2} 
+            color="yellow"
+            trendLabel="this week"
+          />
+          <motion.div whileHover={{ scale: 1.01 }} className="h-full">
+            <Card className="h-full bg-card/50 border-border/50 hover:border-primary/30 transition-colors shadow-sm">
+              <CardContent className="p-6 flex flex-col items-center justify-center h-full">
+                {statsLoading ? (
+                  <Skeleton className="h-24 w-24 rounded-full" />
+                ) : (
+                  <ScoreRing score={stats?.overallScore || 0} size="md" label="Overall Score" />
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <motion.div variants={item} className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Trend Chart */}
-          <Card className="bg-card/50 border-border/50">
+          <Card className="bg-card/50 border-border/50 shadow-sm">
             <CardHeader>
               <CardTitle>Code Quality Trend</CardTitle>
             </CardHeader>
@@ -85,17 +104,27 @@ export default function Dashboard() {
                   <Skeleton className="h-full w-full" />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={trend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                    <AreaChart data={trend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorQuality" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorSecurity" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(val) => format(new Date(val), 'MMM d')} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} domain={[0, 100]} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: 'hsl(var(--popover))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--popover-foreground))' }}
+                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(val) => format(new Date(val), 'MMM d')} axisLine={false} tickLine={false} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} domain={[0, 100]} axisLine={false} tickLine={false} />
+                      <RechartsTooltip 
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
                         labelFormatter={(val) => format(new Date(val), 'MMM d, yyyy')}
                       />
-                      <Line type="monotone" dataKey="qualityScore" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Quality" />
-                      <Line type="monotone" dataKey="securityScore" stroke="hsl(var(--destructive))" strokeWidth={2} dot={false} name="Security" />
-                    </LineChart>
+                      <Area type="monotone" dataKey="qualityScore" stroke="hsl(var(--primary))" fill="url(#colorQuality)" strokeWidth={2} name="Quality" />
+                      <Area type="monotone" dataKey="securityScore" stroke="hsl(var(--destructive))" fill="url(#colorSecurity)" strokeWidth={2} name="Security" />
+                    </AreaChart>
                   </ResponsiveContainer>
                 )}
               </div>
@@ -103,7 +132,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Languages */}
-          <Card className="bg-card/50 border-border/50">
+          <Card className="bg-card/50 border-border/50 shadow-sm">
             <CardHeader>
               <CardTitle>Language Breakdown</CardTitle>
             </CardHeader>
@@ -115,13 +144,14 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={languages} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={true} vertical={false} />
-                      <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis dataKey="language" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: 'hsl(var(--popover))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--popover-foreground))' }}
+                      <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} axisLine={false} tickLine={false} />
+                      <YAxis dataKey="language" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} axisLine={false} tickLine={false} />
+                      <RechartsTooltip 
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
                         formatter={(val) => [`${val}%`, 'Usage']}
+                        cursor={{ fill: 'hsl(var(--muted)/0.3)' }}
                       />
-                      <Bar dataKey="percentage" radius={[0, 4, 4, 0]}>
+                      <Bar dataKey="percentage" radius={[0, 4, 4, 0]} barSize={20}>
                         {languages?.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${(index % 5) + 1}))`} />
                         ))}
@@ -132,63 +162,100 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
-        {/* Recent Reviews */}
-        <Card className="bg-card/50 border-border/50">
-          <CardHeader>
-            <CardTitle>Recent Reviews</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {reviewsLoading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
-              </div>
-            ) : (
-              <div className="rounded-md border border-border">
+        <motion.div variants={item} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 bg-card/50 border-border/50 shadow-sm overflow-hidden">
+            <CardHeader className="bg-muted/10 border-b border-border/50 pb-4">
+              <CardTitle>Recent Reviews</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {reviewsLoading ? (
+                <div className="p-6 space-y-4">
+                  {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+                </div>
+              ) : (
                 <Table>
-                  <TableHeader>
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableHead>PR</TableHead>
+                  <TableHeader className="bg-muted/30">
+                    <TableRow className="border-border/50">
+                      <TableHead className="pl-6">PR</TableHead>
                       <TableHead>Repository</TableHead>
-                      <TableHead>Author</TableHead>
-                      <TableHead>Score</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
+                      <TableHead>Scores</TableHead>
+                      <TableHead className="text-right pr-6">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {reviews?.map((review) => (
-                      <TableRow key={review.id} className="border-border hover:bg-muted/50">
-                        <TableCell className="font-mono text-primary">#{review.pullRequestNumber}</TableCell>
-                        <TableCell className="font-medium">{review.repositoryName}</TableCell>
-                        <TableCell>{review.author}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span className={`font-bold ${scoreColor(review.qualityScore)}`}>{review.qualityScore}</span>
-                            {review.securityScore < 70 && <AlertTriangle className="h-4 w-4 text-destructive" />}
+                      <TableRow key={review.id} className="border-border/50 hover:bg-muted/30 transition-colors">
+                        <TableCell className="pl-6">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8 border border-border">
+                              <AvatarFallback className="bg-primary/10 text-primary text-xs">{review.author.substring(0,2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <span className="font-mono text-primary bg-primary/10 px-2 py-1 rounded-md text-xs">#{review.pullRequestNumber}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <Link href={`/review/${review.id}`} className="text-sm text-primary hover:underline">
-                            View Report
+                        <TableCell className="font-medium text-foreground">{review.repositoryName}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Badge variant="outline" className={`${scoreColor(review.qualityScore)}`}>Q: {review.qualityScore}</Badge>
+                            <Badge variant="outline" className={`${scoreColor(review.securityScore)}`}>S: {review.securityScore}</Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right pr-6">
+                          <Link href={`/review/${review.id}`}>
+                            <button className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors border border-border bg-background px-3 py-1.5 rounded-md hover:border-primary/50">
+                              View
+                            </button>
                           </Link>
                         </TableCell>
                       </TableRow>
                     ))}
                     {reviews?.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                           No recent reviews found
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
+              )}
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-card/50 border-border/50 shadow-sm flex flex-col">
+            <CardHeader className="bg-muted/10 border-b border-border/50 pb-4">
+              <CardTitle>Recent AI Suggestions</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 flex-1">
+              <div className="space-y-4">
+                {[
+                  { icon: ShieldAlert, title: "SQL Injection Risk", severity: "Critical", color: "red", desc: "Found unsanitized input in user query." },
+                  { icon: Zap, title: "High Complexity", severity: "Medium", color: "yellow", desc: "Function parseData() exceeds cyclomatic complexity 15." },
+                  { icon: BookOpen, title: "Missing Docs", severity: "Low", color: "blue", desc: "API endpoint /v1/users lacks OpenAPI documentation." },
+                  { icon: AlertTriangle, title: "Memory Leak", severity: "High", color: "orange", desc: "Unclosed event listener in useEffect." }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-3 p-3 rounded-lg border border-border/50 bg-background/50 hover:border-border transition-colors">
+                    <div className={`mt-0.5 p-1.5 rounded bg-${item.color}-500/10 text-${item.color}-500 h-fit`}>
+                      <item.icon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-semibold text-foreground">{item.title}</span>
+                        <Badge variant="outline" className={`bg-${item.color}-500/10 text-${item.color}-500 border-${item.color}-500/20 text-[10px] uppercase tracking-wider px-1.5 py-0`}>
+                          {item.severity}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </AppLayout>
   );
 }
