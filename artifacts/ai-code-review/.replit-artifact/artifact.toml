@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AI Code Review Assistant"
+version = "1.0.0"
+id = "artifacts/ai-code-review"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18467
+
+[services.development]
+run = "pnpm --filter @workspace/ai-code-review run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-code-review", "run", "build" ]
+publicDir = "artifacts/ai-code-review/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18467"
+BASE_PATH = "/"

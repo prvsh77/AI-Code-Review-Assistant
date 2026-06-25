@@ -1,22 +1,32 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AI Code Review Assistant API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: repositories
+    description: Repository operations
+  - name: pullRequests
+    description: Pull request operations
+  - name: reviews
+    description: Review operations
+  - name: security
+    description: Security operations
+  - name: analytics
+    description: Analytics operations
+  - name: user
+    description: User operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +34,336 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /repositories:
+    get:
+      operationId: listRepositories
+      tags: [repositories]
+      summary: List all repositories
+      parameters:
+        - name: language
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of repositories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Repository"
+
+  /repositories/{id}:
+    get:
+      operationId: getRepository
+      tags: [repositories]
+      summary: Get a repository by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Repository details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Repository"
+
+  /pull-requests:
+    get:
+      operationId: listPullRequests
+      tags: [pullRequests]
+      summary: List all pull requests
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, closed, merged]
+        - name: repositoryId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of pull requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PullRequest"
+
+  /pull-requests/{id}:
+    get:
+      operationId: getPullRequest
+      tags: [pullRequests]
+      summary: Get a pull request by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Pull request details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PullRequest"
+
+  /pull-requests/{id}/trigger-review:
+    post:
+      operationId: triggerReview
+      tags: [pullRequests]
+      summary: Trigger AI review for a pull request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "202":
+          description: Review triggered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewJob"
+
+  /reviews:
+    get:
+      operationId: listReviews
+      tags: [reviews]
+      summary: List all reviews
+      parameters:
+        - name: repositoryId
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+
+  /reviews/{id}:
+    get:
+      operationId: getReview
+      tags: [reviews]
+      summary: Get a specific review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Review details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+
+  /reviews/{id}/files:
+    get:
+      operationId: getReviewFiles
+      tags: [reviews]
+      summary: Get files changed in a review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Files changed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReviewFile"
+
+  /reviews/{id}/comments:
+    get:
+      operationId: getReviewComments
+      tags: [reviews]
+      summary: Get AI comments for a review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReviewComment"
+
+  /security/issues:
+    get:
+      operationId: listSecurityIssues
+      tags: [security]
+      summary: List all security issues
+      parameters:
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [critical, high, medium, low]
+        - name: repositoryId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of security issues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SecurityIssue"
+
+  /security/summary:
+    get:
+      operationId: getSecuritySummary
+      tags: [security]
+      summary: Get security summary counts by severity
+      responses:
+        "200":
+          description: Security summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecuritySummary"
+
+  /analytics/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [analytics]
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /analytics/quality-trend:
+    get:
+      operationId: getQualityTrend
+      tags: [analytics]
+      summary: Get code quality trend over time
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Quality trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrendPoint"
+
+  /analytics/language-breakdown:
+    get:
+      operationId: getLanguageBreakdown
+      tags: [analytics]
+      summary: Get language usage breakdown
+      responses:
+        "200":
+          description: Language breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LanguageStat"
+
+  /user/profile:
+    get:
+      operationId: getUserProfile
+      tags: [user]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /user/activity:
+    get:
+      operationId: getUserActivity
+      tags: [user]
+      summary: Get recent user activity
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /reviews/history:
+    get:
+      operationId: getReviewHistory
+      tags: [reviews]
+      summary: Get review history with search
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Review history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReviewHistoryItem"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +374,308 @@ components:
       required:
         - status
 
+    Repository:
+      type: object
+      required: [id, name, fullName, language, stars, openPrs, lastReviewedAt, reviewScore]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        fullName:
+          type: string
+        language:
+          type: string
+        stars:
+          type: integer
+        openPrs:
+          type: integer
+        lastReviewedAt:
+          type: ["string", "null"]
+        reviewScore:
+          type: ["number", "null"]
+        description:
+          type: ["string", "null"]
+        isPrivate:
+          type: boolean
+
+    PullRequest:
+      type: object
+      required: [id, number, title, author, repositoryId, repositoryName, filesChanged, commits, status, createdAt]
+      properties:
+        id:
+          type: integer
+        number:
+          type: integer
+        title:
+          type: string
+        author:
+          type: string
+        authorAvatar:
+          type: ["string", "null"]
+        repositoryId:
+          type: integer
+        repositoryName:
+          type: string
+        filesChanged:
+          type: integer
+        commits:
+          type: integer
+        status:
+          type: string
+          enum: [open, closed, merged]
+        reviewStatus:
+          type: ["string", "null"]
+          enum: [pending, analyzing, completed, null]
+        createdAt:
+          type: string
+
+    ReviewJob:
+      type: object
+      required: [jobId, pullRequestId, status]
+      properties:
+        jobId:
+          type: string
+        pullRequestId:
+          type: integer
+        status:
+          type: string
+        progress:
+          type: integer
+        agents:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentStatus"
+
+    AgentStatus:
+      type: object
+      required: [name, status]
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [waiting, running, completed, failed]
+        progress:
+          type: ["integer", "null"]
+
+    Review:
+      type: object
+      required: [id, pullRequestId, pullRequestNumber, repositoryName, author, qualityScore, securityScore, complexityScore, documentationScore, status, reviewedAt]
+      properties:
+        id:
+          type: integer
+        pullRequestId:
+          type: integer
+        pullRequestNumber:
+          type: integer
+        repositoryName:
+          type: string
+        author:
+          type: string
+        authorAvatar:
+          type: ["string", "null"]
+        qualityScore:
+          type: number
+        securityScore:
+          type: number
+        complexityScore:
+          type: number
+        documentationScore:
+          type: number
+        status:
+          type: string
+        reviewedAt:
+          type: string
+        aiSummary:
+          type: ["string", "null"]
+        topIssues:
+          type: array
+          items:
+            type: string
+
+    ReviewFile:
+      type: object
+      required: [id, reviewId, filePath, additions, deletions, status]
+      properties:
+        id:
+          type: integer
+        reviewId:
+          type: integer
+        filePath:
+          type: string
+        additions:
+          type: integer
+        deletions:
+          type: integer
+        status:
+          type: string
+          enum: [added, modified, deleted]
+
+    ReviewComment:
+      type: object
+      required: [id, reviewId, filePath, line, type, severity, message]
+      properties:
+        id:
+          type: integer
+        reviewId:
+          type: integer
+        filePath:
+          type: string
+        line:
+          type: integer
+        type:
+          type: string
+          enum: [bug, security, complexity, documentation, style, performance]
+        severity:
+          type: string
+          enum: [critical, high, medium, low]
+        message:
+          type: string
+        suggestion:
+          type: ["string", "null"]
+        codeSnippet:
+          type: ["string", "null"]
+
+    SecurityIssue:
+      type: object
+      required: [id, type, filePath, line, severity, description, status]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        filePath:
+          type: string
+        line:
+          type: integer
+        severity:
+          type: string
+          enum: [critical, high, medium, low]
+        description:
+          type: string
+        fix:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [open, fixed, ignored]
+        repositoryId:
+          type: ["integer", "null"]
+
+    SecuritySummary:
+      type: object
+      required: [critical, high, medium, low, total]
+      properties:
+        critical:
+          type: integer
+        high:
+          type: integer
+        medium:
+          type: integer
+        low:
+          type: integer
+        total:
+          type: integer
+
+    DashboardStats:
+      type: object
+      required: [totalRepositories, totalPullRequests, filesReviewed, overallScore, activeReviews]
+      properties:
+        totalRepositories:
+          type: integer
+        totalPullRequests:
+          type: integer
+        filesReviewed:
+          type: integer
+        overallScore:
+          type: number
+        activeReviews:
+          type: integer
+        reviewsThisWeek:
+          type: integer
+        issuesFound:
+          type: integer
+
+    TrendPoint:
+      type: object
+      required: [date, qualityScore, securityScore]
+      properties:
+        date:
+          type: string
+        qualityScore:
+          type: number
+        securityScore:
+          type: number
+        complexityScore:
+          type: number
+
+    LanguageStat:
+      type: object
+      required: [language, percentage, count]
+      properties:
+        language:
+          type: string
+        percentage:
+          type: number
+        count:
+          type: integer
+
+    UserProfile:
+      type: object
+      required: [id, name, email, githubUsername, avatarUrl, joinedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        githubUsername:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        company:
+          type: ["string", "null"]
+        timezone:
+          type: ["string", "null"]
+        joinedAt:
+          type: string
+        totalReviews:
+          type: integer
+        totalRepositories:
+          type: integer
+
+    ActivityItem:
+      type: object
+      required: [id, type, description, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [review_completed, pr_analyzed, security_found, repository_added]
+        description:
+          type: string
+        repositoryName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ReviewHistoryItem:
+      type: object
+      required: [id, pullRequestNumber, repositoryName, score, status, reviewedAt]
+      properties:
+        id:
+          type: integer
+        pullRequestNumber:
+          type: integer
+        repositoryName:
+          type: string
+        score:
+          type: number
+        status:
+          type: string
+        reviewedAt:
+          type: string
+        author:
+          type: ["string", "null"]

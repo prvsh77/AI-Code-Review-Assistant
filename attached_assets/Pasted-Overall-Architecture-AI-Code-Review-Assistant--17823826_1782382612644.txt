@@ -1,0 +1,619 @@
+Overall Architecture
+                        AI Code Review Assistant
+
+                             ┌─────────────┐
+                             │ GitHub OAuth│
+                             └──────┬──────┘
+                                    │
+                                    ▼
+                        Repository Dashboard
+                                    │
+                    Select Repository / PR
+                                    │
+                                    ▼
+                         AI Analysis Pipeline
+      ┌────────────┬──────────────┬──────────────┬─────────────┐
+      ▼            ▼              ▼              ▼
+ Reviewer      Security      Complexity     Documentation
+  Agent          Agent          Agent           Agent
+      └────────────┬──────────────┬──────────────┘
+                   ▼
+            LangGraph Coordinator
+                   ▼
+             Generate AI Report
+                   ▼
+          Interactive Review Dashboard
+Folder Structure
+ai-code-review-assistant/
+
+client/
+│
+├── public/
+│
+├── src/
+│
+├── assets/
+│
+├── components/
+│   ├── Navbar/
+│   ├── Sidebar/
+│   ├── StatsCard/
+│   ├── RepositoryCard/
+│   ├── PRCard/
+│   ├── IssueCard/
+│   ├── CodeViewer/
+│   ├── SecurityBadge/
+│   ├── Charts/
+│   ├── AgentStatus/
+│   ├── ReviewComment/
+│   ├── MarkdownViewer/
+│   ├── LoadingAnimation/
+│   └── Common/
+│
+├── layouts/
+│
+├── pages/
+│   ├── Landing/
+│   ├── Login/
+│   ├── Dashboard/
+│   ├── Repository/
+│   ├── PullRequests/
+│   ├── Review/
+│   ├── FileExplorer/
+│   ├── Security/
+│   ├── Documentation/
+│   ├── Analytics/
+│   ├── Settings/
+│   └── Profile/
+│
+├── hooks/
+├── services/
+├── store/
+├── utils/
+└── App.tsx
+
+---------------------------------------------------
+
+server/
+
+app/
+
+├── api/
+├── auth/
+├── github/
+├── parser/
+├── graph/
+├── agents/
+│
+│   ├── reviewer_agent.py
+│   ├── security_agent.py
+│   ├── complexity_agent.py
+│   ├── documentation_agent.py
+│   ├── refactor_agent.py
+│
+├── tools/
+│
+│   ├── semgrep.py
+│   ├── bandit.py
+│   ├── pylint.py
+│   ├── radon.py
+│
+├── models/
+├── services/
+├── database/
+├── schemas/
+├── workers/
+└── main.py
+Pages
+1. Landing Page
+
+Purpose
+
+Introduce the product.
+
+Sections
+Navbar
+
+Hero
+
+Trusted By
+
+Features
+
+How AI Review Works
+
+Live Demo
+
+Pricing
+
+FAQ
+
+Footer
+Hero
+----------------------------------------------------
+
+AI Code Review
+for Modern Teams
+
+Review Pull Requests
+with AI in Seconds
+
+[ Connect GitHub ]
+
+Dashboard Preview
+
+----------------------------------------------------
+Features
+
+Grid
+
+AI Review
+
+Security Scan
+
+Bug Detection
+
+Complexity Analysis
+
+Documentation
+
+Performance
+Workflow Section
+GitHub
+
+↓
+
+Analyze PR
+
+↓
+
+Agents
+
+↓
+
+AI Report
+2. Login Page
+---------------------------------
+
+Logo
+
+Welcome Back
+
+Continue with GitHub
+
+Privacy
+
+Terms
+
+---------------------------------
+3. Dashboard
+
+Sidebar
+
+Dashboard
+
+Repositories
+
+Pull Requests
+
+Reviews
+
+Analytics
+
+Security
+
+Settings
+
+Main Content
+
+Top Cards
+
+Repositories
+
+Pull Requests
+
+Files Reviewed
+
+Overall Score
+
+Charts
+
+Quality Trend
+
+Security Trend
+
+Languages
+
+Recent Reviews
+4. Repository Page
+
+Purpose
+
+List repositories.
+
+Repository Card
+
+Logo
+
+Repository Name
+
+Language
+
+Stars
+
+Open PRs
+
+Review Button
+
+Filters
+
+All
+
+Python
+
+JavaScript
+
+Java
+
+Go
+
+Rust
+
+Search Bar
+
+5. Pull Requests Page
+
+Cards
+
+PR #42
+
+Author
+
+Files Changed
+
+Commits
+
+Status
+
+Review AI
+
+Tabs
+
+Open
+
+Closed
+
+Merged
+6. AI Analysis Loading Page
+
+Animation
+
+Reviewer Agent
+
+✔
+
+Security Agent
+
+Loading...
+
+Documentation Agent
+
+Waiting...
+
+Complexity Agent
+
+Running...
+
+Progress
+
+█████████░░░░
+
+65%
+7. Review Dashboard
+
+This is the main page.
+
+Layout
+
+------------------------------------------------------------
+
+Sidebar
+
+Repository
+
+PR Details
+
+------------------------------------------------------------
+
+Summary Cards
+
+------------------------------------------------------------
+
+Quality Score
+
+Security Score
+
+Complexity
+
+Documentation
+
+------------------------------------------------------------
+
+Issues
+
+------------------------------------------------------------
+
+AI Suggestions
+
+------------------------------------------------------------
+
+Files Changed
+
+------------------------------------------------------------
+
+Code Viewer
+
+------------------------------------------------------------
+8. Code Viewer
+
+Split Layout
+
+-----------------------------------------------
+
+Files
+
+|
+
+Editor
+
+|
+
+AI Comments
+
+-----------------------------------------------
+
+Editor
+
+Monaco
+
+AI Comments
+
+Line 23
+
+Possible SQL Injection
+
+Severity
+
+High
+
+Fix
+
+Parameterized Query
+9. Security Page
+
+Widgets
+
+Critical
+
+High
+
+Medium
+
+Low
+
+Table
+
+Type
+
+File
+
+Line
+
+Severity
+
+Fix
+
+Charts
+
+OWASP Top 10
+
+Severity Distribution
+
+Timeline
+10. Analytics
+
+Cards
+
+Overall Quality
+
+Average Complexity
+
+Documentation
+
+Review Time
+
+Charts
+
+Code Quality
+
+Technical Debt
+
+Complexity
+
+Language Usage
+
+Heatmap
+
+Hot Files
+
+High Risk Files
+11. Documentation
+
+Generated docs
+
+README
+
+Functions
+
+Classes
+
+API
+
+Comments
+
+Preview
+
+Markdown Viewer
+
+Export
+
+PDF
+
+Markdown
+
+HTML
+12. Settings
+
+Tabs
+
+Profile
+
+GitHub
+
+LLM
+
+Notifications
+
+Appearance
+Sidebar
+Logo
+
+Dashboard
+
+Repositories
+
+Pull Requests
+
+AI Reviews
+
+Security
+
+Analytics
+
+Documentation
+
+History
+
+Settings
+
+Logout
+Navigation Flow
+Landing
+
+↓
+
+Login
+
+↓
+
+Dashboard
+
+↓
+
+Repository
+
+↓
+
+Pull Requests
+
+↓
+
+Analyze
+
+↓
+
+Review Dashboard
+
+↓
+
+Code Viewer
+
+↓
+
+Analytics
+
+↓
+
+Export Report
+Color Palette
+Background
+
+#0B1020
+
+Sidebar
+
+#111827
+
+Card
+
+#1F2937
+
+Primary
+
+#3B82F6
+
+Success
+
+#10B981
+
+Warning
+
+#F59E0B
+
+Danger
+
+#EF4444
+
+Text
+
+#F9FAFB
+Components
+Navbar
+
+Sidebar
+
+RepositoryCard
+
+PullRequestCard
+
+ScoreCard
+
+SecurityCard
+
+ComplexityCard
+
+IssueCard
+
+ReviewComment
+
+MarkdownViewer
+
+ActivityTimeline
+
+AgentStatus
+
+ProgressBar
+
+FileTree
+
+MonacoEditor
+
+ChartCard
+
+UserMenu
+
+NotificationBell
+
+SearchBar
+
+ThemeSwitcher
