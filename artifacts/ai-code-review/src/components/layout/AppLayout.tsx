@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { AiChatWidget } from "@/components/AiChatWidget";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -240,6 +241,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </main>
+      <AiChatWidget />
     </div>
   );
 }
