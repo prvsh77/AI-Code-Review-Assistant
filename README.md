@@ -1,7 +1,5 @@
 <div align="center">
-<p align="center">
-  <img src="docs/Banner(2).png" width="100%">
-</p>
+<img src="docs/Banner%20(2).png" width="100%">
 # 🤖 AI Code Review Assistant
 
 ### AI-Powered Multi-Agent Platform for Intelligent Pull Request Reviews
