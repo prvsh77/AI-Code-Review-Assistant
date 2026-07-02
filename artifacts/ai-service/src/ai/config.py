@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     ollama_model: str = "llama3.2"
 
     # ── Server ─────────────────────────────────────────────────────────────
-    port: int = 8000
+    port: int = 8085
     log_level: str = "INFO"
 
     # ── Cache ──────────────────────────────────────────────────────────────
