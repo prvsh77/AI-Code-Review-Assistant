@@ -161,7 +161,6 @@ vi.mock("../lib/github", () => {
     exchangeOAuthCode: vi.fn(),
     getGitHubUser: vi.fn(),
     listPullRequests: vi.fn(),
-    listBranches: vi.fn(),
   };
 });
 
@@ -195,7 +194,6 @@ describe("API Routing Integration Tests", () => {
       { id: 1, name: "repo-1", fullName: "user/repo-1", language: "TypeScript" }
     ] as any);
 
-    vi.mocked(github.listBranches).mockResolvedValue([{ name: "main" }] as any);
     vi.mocked(github.listPullRequests).mockResolvedValue([] as any);
 
     // Stub global fetch dynamically

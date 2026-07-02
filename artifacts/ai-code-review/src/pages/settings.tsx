@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +25,24 @@ const item = {
 export default function Settings() {
   const { data: profile, isLoading } = useGetUserProfile({ query: { queryKey: getGetUserProfileQueryKey() } });
   const { toast } = useToast();
+  const [connecting, setConnecting] = useState(false);
+
+  const handleConnectGitHub = async () => {
+    setConnecting(true);
+    try {
+      const res = await fetch(`/api/auth/github/url?origin=${window.location.origin}`);
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to get GitHub authorize URL.");
+        setConnecting(false);
+      }
+    } catch (err) {
+      alert("Failed to connect to API server.");
+      setConnecting(false);
+    }
+  };
 
   const handleSave = () => {
     toast({
@@ -117,12 +136,28 @@ export default function Settings() {
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="font-semibold text-foreground">{profile?.githubUsername || "Not connected"}</p>
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-500 border border-green-500/20">Connected</span>
+                              {profile?.githubUsername ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-500 border border-green-500/20">Connected</span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-muted text-muted-foreground border border-border">Disconnected</span>
+                              )}
                             </div>
-                            <p className="text-sm text-muted-foreground mt-1">Read/write access to repositories</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {profile?.githubUsername ? "Read/write access to repositories" : "Link your GitHub account to start reviewing code"}
+                            </p>
                           </div>
                         </div>
-                        <Button variant="outline" className="border-border/50 hover:bg-muted w-full sm:w-auto">Manage Access</Button>
+                        {profile?.githubUsername ? (
+                          <Button variant="outline" className="border-border/50 hover:bg-muted w-full sm:w-auto">Manage Access</Button>
+                        ) : (
+                          <Button
+                            onClick={handleConnectGitHub}
+                            disabled={connecting}
+                            className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto shadow-sm"
+                          >
+                            {connecting ? "Connecting..." : "Connect Account"}
+                          </Button>
+                        )}
                       </div>
                       
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border border-border/50 rounded-xl bg-background/50 gap-4 opacity-70">

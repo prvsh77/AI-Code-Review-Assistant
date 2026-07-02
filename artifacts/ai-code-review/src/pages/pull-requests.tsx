@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useListPullRequests, getListPullRequestsQueryKey, useTriggerReview } from "@workspace/api-client-react";
+import { useListPullRequests, getListPullRequestsQueryKey, useTriggerReview, useGetUserProfile, getGetUserProfileQueryKey } from "@workspace/api-client-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { Link, useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
 import { normalizeArray } from "@/lib/utils";
+import { GitHubEmptyState } from "@/components/GitHubEmptyState";
 
 const container = {
   hidden: { opacity: 0 },
@@ -32,9 +33,26 @@ export default function PullRequests() {
   const searchParams = new URLSearchParams(window.location.search);
   const repositoryId = searchParams.get("repositoryId") ? Number(searchParams.get("repositoryId")) : undefined;
 
+  const { data: profile, isLoading: profileLoading } = useGetUserProfile({
+    query: {
+      queryKey: getGetUserProfileQueryKey(),
+      retry: false,
+      refetchOnWindowFocus: false,
+    }
+  });
+
+  const isGithubConnected = profileLoading || !!profile?.githubUsername;
+
   const { data: prs, isLoading } = useListPullRequests(
     { repositoryId },
-    { query: { queryKey: getListPullRequestsQueryKey({ repositoryId }) } }
+    {
+      query: {
+        queryKey: getListPullRequestsQueryKey({ repositoryId }),
+        retry: false,
+        refetchOnWindowFocus: false,
+        enabled: !!(isGithubConnected && repositoryId),
+      }
+    }
   );
 
   const prsData = normalizeArray<any>(prs, "PullRequests");
@@ -119,33 +137,23 @@ export default function PullRequests() {
                       <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
                         <div className="flex items-center gap-1.5">
                           <Avatar className="h-5 w-5 border border-border">
-                            <AvatarImage src={pr.authorAvatar || undefined} />
-                            <AvatarFallback className="text-[8px]">{pr.author.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            <AvatarImage src={pr.authorAvatarUrl || undefined} />
+                            <AvatarFallback className="text-[10px] bg-primary/10 text-primary">{pr.author?.substring(0, 2).toUpperCase()}</AvatarFallback>
                           </Avatar>
-                          <span className="font-medium text-foreground">{pr.author}</span>
-                        </div>
-                        <span>•</span>
-                        <div className="flex items-center gap-1 text-xs bg-muted/30 px-2 py-0.5 rounded-md border border-border/50">
-                          <GitBranch className="h-3 w-3" />
-                          <span className="font-mono">feat/update-api</span>
+                          <span className="font-medium text-foreground/80">{pr.author}</span>
                         </div>
                         <span>•</span>
                         <span>{format(new Date(pr.createdAt), 'MMM d, yyyy')}</span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          <FileText className="h-3.5 w-3.5" />
-                          <span>{pr.filesChanged} files</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <GitCommit className="h-3.5 w-3.5" />
-                          <span>{pr.commits} commits</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-primary/80">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>~{Math.max(1, Math.floor(pr.filesChanged / 2))} min review</span>
-                        </div>
+                      <div className="flex flex-wrap gap-2 text-xs font-mono text-muted-foreground">
+                        <span className="flex items-center gap-1 bg-muted/30 px-2 py-0.5 rounded border border-border/30">
+                          <GitBranch className="h-3 w-3" /> {pr.sourceBranch}
+                        </span>
+                        <ArrowRight className="h-3.5 w-3.5 mt-0.5" />
+                        <span className="flex items-center gap-1 bg-muted/30 px-2 py-0.5 rounded border border-border/30">
+                          <GitBranch className="h-3 w-3" /> {pr.targetBranch}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -204,31 +212,35 @@ export default function PullRequests() {
           <p className="text-muted-foreground mt-1">Trigger and view AI code reviews for pull requests.</p>
         </motion.div>
 
-        <motion.div variants={item}>
-          <Tabs defaultValue="open" className="w-full">
-            <TabsList className="bg-transparent border-b border-border w-full justify-start rounded-none h-auto p-0 space-x-6">
-              <TabsTrigger value="open" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-3 pt-2 text-sm font-medium text-muted-foreground data-[state=active]:text-foreground transition-none">
-                Open <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">{openCount}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="merged" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-3 pt-2 text-sm font-medium text-muted-foreground data-[state=active]:text-foreground transition-none">
-                Merged <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">{mergedCount}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="closed" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-3 pt-2 text-sm font-medium text-muted-foreground data-[state=active]:text-foreground transition-none">
-                Closed <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">{closedCount}</Badge>
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="open" className="m-0 focus-visible:outline-none focus-visible:ring-0">
-              {renderPRList(prsData.filter(pr => pr && pr.status === "open"))}
-            </TabsContent>
-            <TabsContent value="merged" className="m-0 focus-visible:outline-none focus-visible:ring-0">
-              {renderPRList(prsData.filter(pr => pr && pr.status === "merged"))}
-            </TabsContent>
-            <TabsContent value="closed" className="m-0 focus-visible:outline-none focus-visible:ring-0">
-              {renderPRList(prsData.filter(pr => pr && pr.status === "closed"))}
-            </TabsContent>
-          </Tabs>
-        </motion.div>
+        {!isGithubConnected ? (
+          <GitHubEmptyState />
+        ) : (
+          <motion.div variants={item}>
+            <Tabs defaultValue="open" className="w-full">
+              <TabsList className="bg-transparent border-b border-border w-full justify-start rounded-none h-auto p-0 space-x-6">
+                <TabsTrigger value="open" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-3 pt-2 text-sm font-medium text-muted-foreground data-[state=active]:text-foreground transition-none">
+                  Open <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">{openCount}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="merged" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-3 pt-2 text-sm font-medium text-muted-foreground data-[state=active]:text-foreground transition-none">
+                  Merged <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">{mergedCount}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="closed" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-3 pt-2 text-sm font-medium text-muted-foreground data-[state=active]:text-foreground transition-none">
+                  Closed <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">{closedCount}</Badge>
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="open" className="m-0 focus-visible:outline-none focus-visible:ring-0">
+                {renderPRList(prsData.filter(pr => pr && pr.status === "open"))}
+              </TabsContent>
+              <TabsContent value="merged" className="m-0 focus-visible:outline-none focus-visible:ring-0">
+                {renderPRList(prsData.filter(pr => pr && pr.status === "merged"))}
+              </TabsContent>
+              <TabsContent value="closed" className="m-0 focus-visible:outline-none focus-visible:ring-0">
+                {renderPRList(prsData.filter(pr => pr && pr.status === "closed"))}
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+        )}
       </motion.div>
     </AppLayout>
   );

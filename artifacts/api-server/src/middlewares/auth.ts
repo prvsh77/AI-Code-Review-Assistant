@@ -59,21 +59,44 @@ export async function requireGitHubToken(
       return;
     }
 
-    if (!user.githubAccessToken) {
-      res.status(401).json({ 
-        error: "github_token_missing", 
-        message: "No GitHub account connected. Please login/re-authenticate with GitHub." 
-      });
-      return;
-    }
-
     let decryptedToken: string;
     try {
+      if (!user.githubAccessToken) {
+        throw new Error("Missing GitHub token");
+      }
       decryptedToken = decrypt(user.githubAccessToken);
     } catch (err) {
-      res.status(401).json({ 
-        error: "github_token_invalid", 
-        message: "Your GitHub connection is corrupted. Please reconnect your account." 
+      const url = req.originalUrl || req.url || "";
+      if (url.includes("/analytics/dashboard")) {
+        res.status(200).json({
+          githubConnected: false,
+          message: "Connect your GitHub account to enable live repository analytics.",
+          totalRepositories: 0,
+          totalPullRequests: 0,
+          filesReviewed: 0,
+          overallScore: 0,
+          activeReviews: 0,
+          reviewsThisWeek: 0,
+          issuesFound: 0
+        });
+        return;
+      }
+      if (
+        url.includes("/analytics/language-breakdown") ||
+        url.includes("/repositories") ||
+        url.includes("/pull-requests")
+      ) {
+        res.status(200).json({
+          githubConnected: false,
+          data: []
+        });
+        return;
+      }
+
+      res.status(200).json({
+        githubConnected: false,
+        message: "GitHub integration is required for this action.",
+        data: []
       });
       return;
     }
