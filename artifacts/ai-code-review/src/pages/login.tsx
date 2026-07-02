@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useLogin } from "@workspace/api-client-react";
 import { tokenStore } from "@/lib/tokenStore";
-
+const API_URL = import.meta.env.VITE_API_URL;
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,7 +47,7 @@ export default function Login() {
       {/* Left Panel - Decorative */}
       <div className="hidden lg:flex w-1/2 bg-card relative overflow-hidden flex-col justify-between p-12 border-r border-border">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-primary/20 via-background to-background pointer-events-none" />
-        
+
         {/* Animated Particles background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
           {[...Array(20)].map((_, i) => (
@@ -87,7 +87,7 @@ export default function Login() {
 
         {/* Mockup Card */}
         <div className="relative z-10 w-full max-w-lg mt-12 perspective-1000">
-          <motion.div 
+          <motion.div
             initial={{ rotateY: 5, rotateX: 5, opacity: 0, y: 50 }}
             animate={{ rotateY: -5, rotateX: 10, opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -136,7 +136,7 @@ export default function Login() {
           <span className="font-bold tracking-tight font-mono">AI Code Review</span>
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
@@ -158,11 +158,11 @@ export default function Login() {
             <div className="space-y-4">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email Address</label>
-                <Input 
-                  type="email" 
+                <Input
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com" 
+                  placeholder="name@example.com"
                   className="h-12 bg-card border-border focus-visible:ring-primary"
                   disabled={loginMutation.isPending}
                 />
@@ -170,11 +170,11 @@ export default function Login() {
 
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Password</label>
-                <Input 
-                  type="password" 
+                <Input
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" 
+                  placeholder="••••••••"
                   className="h-12 bg-card border-border focus-visible:ring-primary"
                   disabled={loginMutation.isPending}
                 />
@@ -182,7 +182,7 @@ export default function Login() {
 
               <div className="flex items-center justify-between py-1">
                 <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
-                  <input 
+                  <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
@@ -196,7 +196,7 @@ export default function Login() {
                 </a>
               </div>
 
-              <Button 
+              <Button
                 type="submit"
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base font-semibold shadow-md shadow-primary/10 transition-transform active:scale-[0.98]"
                 disabled={loginMutation.isPending}
@@ -225,11 +225,13 @@ export default function Login() {
             </div>
           </div>
 
-          <Button 
+          <Button
             className="w-full bg-[#24292e] text-white hover:bg-[#24292e]/90 h-12 text-base font-medium shadow-sm"
             onClick={async () => {
               try {
-                const res = await fetch(`/api/auth/github/url?origin=${window.location.origin}`);
+                const res = await fetch(
+                  `${API_URL}/api/auth/github/url?origin=${encodeURIComponent(window.location.origin)}`
+                );
                 const data = await res.json();
                 if (data.url) {
                   window.location.href = data.url;

@@ -30,7 +30,11 @@ export default function Settings() {
   const handleConnectGitHub = async () => {
     setConnecting(true);
     try {
-      const res = await fetch(`/api/auth/github/url?origin=${window.location.origin}`);
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const res = await fetch(
+        `${API_URL}/api/auth/github/url?origin=${encodeURIComponent(window.location.origin)}`
+      );
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
@@ -159,7 +163,7 @@ export default function Settings() {
                           </Button>
                         )}
                       </div>
-                      
+
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border border-border/50 rounded-xl bg-background/50 gap-4 opacity-70">
                         <div className="flex items-center gap-4">
                           <div className="h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
@@ -197,7 +201,7 @@ export default function Settings() {
                             <option value="gemini">Gemini 1.5 Pro</option>
                           </select>
                         </div>
-                        
+
                         <div className="flex flex-col sm:flex-row justify-between gap-4 p-4 rounded-lg bg-background border border-border/50">
                           <div className="max-w-md">
                             <p className="font-semibold text-foreground">Security Agent</p>
