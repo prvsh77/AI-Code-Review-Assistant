@@ -1,154 +1,362 @@
 <div align="center">
 
-# M Prashant Rao
+# 🤖 AI Code Review Assistant
 
-### AI Engineer • Machine Learning • Generative AI • Full Stack AI Systems
+### Multi-Agent AI Platform for Intelligent Pull Request Reviews
 
-![AI](https://img.shields.io/badge/Applied%20AI-0078D4?style=for-the-badge)
-![LLMs](https://img.shields.io/badge/LLMs-orange?style=for-the-badge)
-![RAG](https://img.shields.io/badge/RAG-green?style=for-the-badge)
-![Open%20Source](https://img.shields.io/badge/Open%20Source-black?style=for-the-badge)
+<p align="center">
+AI-powered code review platform that analyzes pull requests, detects bugs, identifies security vulnerabilities, evaluates code quality, and generates actionable review reports using Large Language Models.
+</p>
 
-Building production-ready AI applications combining modern machine learning,
-large language models, scalable backend systems, and intuitive user experiences.
+<p align="center">
+
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript)
+
+</p>
+
+---
+
+<img src="./docs/banner.png" width="100%" />
 
 </div>
 
 ---
 
-# 👨‍💻 About Me
+# ✨ Features
 
-I'm a Computer Science student passionate about building AI-powered software that solves real-world problems.
+### 🤖 AI Code Reviews
 
-Rather than focusing only on model development, I enjoy building complete AI systems—from data ingestion and retrieval pipelines to backend APIs, deployment, monitoring, and user-facing applications.
+- Automated pull request analysis
+- Multi-agent review workflow
+- Code quality evaluation
+- Architecture feedback
+- Documentation analysis
 
-### Interests
+---
 
-- 🤖 Large Language Models
-- 🧠 Machine Learning
-- 📄 Retrieval-Augmented Generation (RAG)
-- 💬 NLP
-- 🏗 Backend Architecture
-- ⚡ FastAPI
-- 🌐 Full Stack AI Applications
-- 📊 AI Evaluation
-- ☁ Cloud Deployment
-- 🐳 Docker
+### 🔒 Security Analysis
+
+- SQL Injection Detection
+- XSS Detection
+- Secrets Detection
+- Authentication Review
+- Dependency Risk Analysis
+- Security Score
+
+---
+
+### 📊 Analytics Dashboard
+
+- Repository Insights
+- Review History
+- Language Distribution
+- Code Quality Trends
+- Security Metrics
+- Team Statistics
+
+---
+
+### 🔗 GitHub Integration
+
+- GitHub OAuth Login
+- Repository Sync
+- Pull Request Import
+- Repository Dashboard
+- Trigger Reviews
+- Review Status Tracking
+
+---
+
+### 👥 Authentication
+
+- User Registration
+- Secure Login
+- JWT Authentication
+- Protected Routes
+- Session Management
+
+---
+
+### 💬 AI Assistant
+
+- Streaming Responses
+- Context-Aware Conversations
+- Pull Request Discussion
+- Review Explanation
+- Code Suggestions
+
+---
+
+# 🏗 Architecture
+
+```
+                     GitHub API
+                          │
+                          │
+                Repository / PR Data
+                          │
+                          ▼
+
+              FastAPI / Express Backend
+        Authentication • REST APIs • Database
+
+              │                    │
+              │                    │
+
+              ▼                    ▼
+
+      PostgreSQL Database     AI Service
+
+                                   │
+                                   ▼
+
+                      Multi-Agent Review Engine
+
+             Security Agent
+             Code Quality Agent
+             Performance Agent
+             Documentation Agent
+
+                                   │
+
+                                   ▼
+
+                          OpenAI / LLM
+
+                                   │
+
+                                   ▼
+
+                        Final Review Report
+
+                                   │
+
+                                   ▼
+
+                          React Frontend
+```
 
 ---
 
 # 🚀 Tech Stack
 
-## Languages
+## Frontend
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
-![SQL](https://img.shields.io/badge/SQL-336791?style=flat)
-
----
-
-## AI / Machine Learning
-
-![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=pytorch)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=flat&logo=tensorflow)
-![Scikit-Learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat&logo=scikitlearn)
-![Transformers](https://img.shields.io/badge/HuggingFace-FFD21E?style=flat&logo=huggingface)
-![LangChain](https://img.shields.io/badge/LangChain-121212?style=flat)
-![LangGraph](https://img.shields.io/badge/LangGraph-4CAF50?style=flat)
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Query
+- React Router
+- Recharts
 
 ---
 
 ## Backend
 
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js)
-![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express)
-
----
-
-## Frontend
-
-![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react)
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38BDF8?style=flat&logo=tailwindcss)
-
----
-
-## Databases
-
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat&logo=mongodb)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis)
-
----
-
-## DevOps & Tools
-
-![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker)
-![Postman](https://img.shields.io/badge/Postman-FF6C37?style=flat&logo=postman)
-
----
-
-# ⭐ Featured Projects
-
-## 🤖 AI Code Review Assistant
-
-Production-ready AI platform for automated pull request reviews using multi-agent LLM workflows.
-
-**Tech**
-
 - FastAPI
-- React
-- TypeScript
-- PostgreSQL
-- GitHub API
-- OpenAI
+- Express.js
+- Node.js
 - JWT Authentication
 
 ---
 
-## 📄 AI Document Intelligence
+## AI
 
-Enterprise document understanding platform featuring OCR, embeddings, semantic search, and Retrieval-Augmented Generation.
-
----
-
-## 💰 FinOps AI Copilot
-
-AI-powered financial analysis platform with intelligent agents, automated reporting, and conversational analytics.
+- OpenAI
+- Multi-Agent Architecture
+- Prompt Engineering
+- Streaming Responses
 
 ---
 
-# 📈 Currently Learning
+## Database
 
-- AI Agents
-- MCP
-- Advanced RAG
-- AI Evaluation
-- LangGraph
-- Kubernetes
-- AWS
+- PostgreSQL
+- Drizzle ORM
 
 ---
 
-# 🤝 Connect With Me
+## DevOps
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-blue?style=for-the-badge&logo=linkedin)](YOUR_LINKEDIN)
+- Docker
+- GitHub Actions
+- Vitest
+- Pytest
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-black?style=for-the-badge)](YOUR_PORTFOLIO)
+---
 
-[![Email](https://img.shields.io/badge/Email-red?style=for-the-badge&logo=gmail)](mailto:YOUR_EMAIL)
+# 📷 Screenshots
+
+## Landing Page
+
+<img src="./docs/screenshots/landing.png"/>
+
+---
+
+## Dashboard
+
+<img src="./docs/screenshots/dashboard.png"/>
+
+---
+
+## Repository Analysis
+
+<img src="./docs/screenshots/repositories.png"/>
+
+---
+
+## AI Review
+
+<img src="./docs/screenshots/review.png"/>
+
+---
+
+## Security Dashboard
+
+<img src="./docs/screenshots/security.png"/>
+
+---
+
+# 📂 Project Structure
+
+```
+AI-Code-Review-Assistant
+
+artifacts/
+│
+├── ai-code-review/      # React Frontend
+├── api-server/          # Express Backend
+├── ai-service/          # FastAPI AI Service
+│
+lib/
+│
+├── db/
+├── api-client-react/
+├── api-zod/
+└── api-spec/
+```
+
+---
+
+# ⚙ Installation
+
+```bash
+git clone https://github.com/prvsh77/AI-Code-Review-Assistant.git
+
+cd AI-Code-Review-Assistant
+
+pnpm install
+```
+
+---
+
+## Configure Environment
+
+Create:
+
+```
+artifacts/api-server/.env
+
+artifacts/ai-service/.env
+
+lib/db/.env
+```
+
+Example:
+
+```env
+DATABASE_URL=
+
+JWT_SECRET=
+
+OPENAI_API_KEY=
+
+GITHUB_CLIENT_ID=
+
+GITHUB_CLIENT_SECRET=
+```
+
+---
+
+# ▶ Run
+
+Backend
+
+```bash
+pnpm --filter api-server start
+```
+
+Frontend
+
+```bash
+pnpm --filter ai-code-review dev
+```
+
+AI Service
+
+```bash
+python main.py
+```
+
+---
+
+# 🧪 Testing
+
+Backend
+
+```bash
+pnpm test
+```
+
+Python
+
+```bash
+pytest
+```
+
+---
+
+# 🛣 Roadmap
+
+- [x] Authentication
+- [x] JWT
+- [x] GitHub OAuth
+- [x] GitHub Repository Integration
+- [x] AI Review Engine
+- [x] Security Analysis
+- [x] Dashboard
+- [x] Analytics
+- [x] AI Streaming
+- [x] PostgreSQL
+- [x] Testing
+
+Upcoming
+
+- [ ] GitHub Webhooks
+- [ ] Team Collaboration
+- [ ] Slack Notifications
+- [ ] Azure DevOps Support
+- [ ] GitLab Support
+- [ ] Review Comparison
+- [ ] AI Cost Dashboard
+
+---
+
+# 📄 License
+
+MIT License
 
 ---
 
 <div align="center">
 
-### "Building practical AI systems that people can actually use."
+### ⭐ If you found this project useful, consider giving it a star!
 
-⭐ Thanks for visiting my profile!
+Built with ❤️ using React, FastAPI, PostgreSQL, and Large Language Models.
 
 </div>
