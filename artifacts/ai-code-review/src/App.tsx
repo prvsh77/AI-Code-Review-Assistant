@@ -3,7 +3,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
-import { setAuthTokenGetter, useRefreshToken } from "@workspace/api-client-react";
+import {
+  setBaseUrl,
+  setAuthTokenGetter,
+  useRefreshToken,
+} from "@workspace/api-client-react";
 import { tokenStore } from "@/lib/tokenStore";
 import { Loader2 } from "lucide-react";
 
@@ -28,7 +32,10 @@ import GitHubCallback from "@/pages/GitHubCallback";
 
 const queryClient = new QueryClient();
 
-// Setup the custom fetch bearer token getter
+// Configure API base URL
+setBaseUrl(import.meta.env.VITE_API_URL);
+
+// Setup bearer token getter
 setAuthTokenGetter(() => tokenStore.getToken());
 
 function ProtectedRoute({ path, component: Component }: { path: string; component: React.ComponentType<any> }) {
