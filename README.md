@@ -1,6 +1,6 @@
 <div align="center">
 <img src="docs/Banner%20(2).png" width="100%">
-# 🤖 AI Code Review Assistant
+  AI Code Review Assistant
 
 ### AI-Powered Multi-Agent Platform for Intelligent Pull Request Reviews
 
@@ -25,7 +25,7 @@ Analyze pull requests using Large Language Models, detect security vulnerabiliti
 
 ---
 
-# 🚀 Overview
+#  Overview
 
 AI Code Review Assistant is a full-stack AI platform that automates pull request reviews using Large Language Models and a multi-agent architecture.
 
@@ -33,9 +33,9 @@ The application combines GitHub integration, AI-powered code analysis, security 
 
 ---
 
-# ✨ Features
+#  Features
 
-## 🤖 AI Code Review
+## AI Code Review
 
 - AI-powered pull request analysis
 - Multi-agent review workflow
@@ -47,7 +47,7 @@ The application combines GitHub integration, AI-powered code analysis, security 
 
 ---
 
-## 🔒 Security Analysis
+##  Security Analysis
 
 - SQL Injection Detection
 - XSS Detection
@@ -58,7 +58,7 @@ The application combines GitHub integration, AI-powered code analysis, security 
 
 ---
 
-## 📊 Analytics Dashboard
+##  Analytics Dashboard
 
 - Repository Statistics
 - Review History
@@ -69,7 +69,7 @@ The application combines GitHub integration, AI-powered code analysis, security 
 
 ---
 
-## 🔗 GitHub Integration
+##  GitHub Integration
 
 - GitHub OAuth
 - Repository Synchronization
@@ -80,7 +80,7 @@ The application combines GitHub integration, AI-powered code analysis, security 
 
 ---
 
-## 👤 Authentication
+##  Authentication
 
 - Email Registration
 - Secure Login
@@ -90,7 +90,7 @@ The application combines GitHub integration, AI-powered code analysis, security 
 
 ---
 
-## 💬 AI Assistant
+##  AI Assistant
 
 - Streaming Responses
 - Context-aware Conversations
@@ -100,7 +100,7 @@ The application combines GitHub integration, AI-powered code analysis, security 
 
 ---
 
-# 🏗 System Architecture
+#  System Architecture
 
 ```
                  GitHub API
@@ -136,7 +136,7 @@ PostgreSQL Database          FastAPI AI Service
 
 ---
 
-# 🛠 Tech Stack
+#  Tech Stack
 
 ## Frontend
 
@@ -202,7 +202,7 @@ PostgreSQL Database          FastAPI AI Service
 
 ---
 
-# 📁 Project Structure
+#  Project Structure
 
 ```text
 AI-Code-Review-Assistant
@@ -237,7 +237,7 @@ pnpm install
 
 ---
 
-# 🔧 Environment Variables
+#  Environment Variables
 
 Create the following files:
 
@@ -321,7 +321,7 @@ pytest
 
 ---
 
-# 🗺 Roadmap
+#  Roadmap
 
 ### Completed
 
@@ -349,7 +349,7 @@ pytest
 
 ---
 
-# 📄 License
+#  License
 
 MIT License
 
