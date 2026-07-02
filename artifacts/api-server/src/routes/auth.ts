@@ -364,16 +364,29 @@ router.post("/auth/github", loginLimiter, async (req, res) => {
 
 router.get("/auth/github/url", (req, res) => {
   const clientId = process.env.GITHUB_CLIENT_ID;
+
   if (!clientId) {
-    res.status(500).json({ error: "GITHUB_CLIENT_ID not configured on backend" });
-    return;
+    return res.status(500).json({
+      error: "GITHUB_CLIENT_ID not configured",
+    });
   }
-  
-  const origin = (req.query.origin as string) || `${req.protocol}://${req.get("host")}`;
-  const redirectUri = `${origin}/auth/github/callback`;
-  const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo,user&redirect_uri=${encodeURIComponent(redirectUri)}`;
-  
-  res.json({ url });
+
+  // Public URL of your backend
+  const backendUrl =
+    process.env.PUBLIC_API_URL ||
+    `${req.protocol}://${req.get("host")}`;
+
+  const redirectUri = `${backendUrl}/api/auth/github/callback`;
+
+  const url = new URL("https://github.com/login/oauth/authorize");
+
+  url.searchParams.set("client_id", clientId);
+  url.searchParams.set("scope", "repo,user");
+  url.searchParams.set("redirect_uri", redirectUri);
+
+  res.json({
+    url: url.toString(),
+  });
 });
 
 export default router;
