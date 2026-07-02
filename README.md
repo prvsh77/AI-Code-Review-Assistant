@@ -2,174 +2,172 @@
 
 # 🤖 AI Code Review Assistant
 
-### Multi-Agent AI Platform for Intelligent Pull Request Reviews
+### AI-Powered Multi-Agent Platform for Intelligent Pull Request Reviews
 
 <p align="center">
-AI-powered code review platform that analyzes pull requests, detects bugs, identifies security vulnerabilities, evaluates code quality, and generates actionable review reports using Large Language Models.
+Analyze pull requests using Large Language Models, detect security vulnerabilities, evaluate code quality, generate documentation insights, and produce actionable review reports through an AI-powered multi-agent workflow.
 </p>
 
 <p align="center">
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript)
+![Express](https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql)
 ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript)
 
 </p>
 
----
-
-<img src="./docs/banner.png" width="100%" />
+<img src="./docs/banner.png" width="100%"/>
 
 </div>
 
 ---
 
-# ✨ Features
+# 🚀 Overview
 
-### 🤖 AI Code Reviews
+AI Code Review Assistant is a full-stack AI platform that automates pull request reviews using Large Language Models and a multi-agent architecture.
 
-- Automated pull request analysis
-- Multi-agent review workflow
-- Code quality evaluation
-- Architecture feedback
-- Documentation analysis
+The application combines GitHub integration, AI-powered code analysis, security scanning, documentation review, and interactive analytics into a unified developer experience.
 
 ---
 
-### 🔒 Security Analysis
+# ✨ Features
+
+## 🤖 AI Code Review
+
+- AI-powered pull request analysis
+- Multi-agent review workflow
+- Code quality evaluation
+- Security assessment
+- Documentation analysis
+- Actionable review reports
+- AI-generated review summaries
+
+---
+
+## 🔒 Security Analysis
 
 - SQL Injection Detection
 - XSS Detection
-- Secrets Detection
+- Secret Detection
 - Authentication Review
 - Dependency Risk Analysis
-- Security Score
+- Security Scoring
 
 ---
 
-### 📊 Analytics Dashboard
+## 📊 Analytics Dashboard
 
-- Repository Insights
+- Repository Statistics
 - Review History
 - Language Distribution
-- Code Quality Trends
-- Security Metrics
-- Team Statistics
+- Quality Trends
+- Review Metrics
+- Interactive Charts
 
 ---
 
-### 🔗 GitHub Integration
+## 🔗 GitHub Integration
 
-- GitHub OAuth Login
-- Repository Sync
+- GitHub OAuth
+- Repository Synchronization
 - Pull Request Import
 - Repository Dashboard
-- Trigger Reviews
-- Review Status Tracking
+- Trigger AI Reviews
+- Graceful onboarding for users without connected GitHub accounts
 
 ---
 
-### 👥 Authentication
+## 👤 Authentication
 
-- User Registration
+- Email Registration
 - Secure Login
 - JWT Authentication
 - Protected Routes
-- Session Management
+- Session Persistence
 
 ---
 
-### 💬 AI Assistant
+## 💬 AI Assistant
 
 - Streaming Responses
-- Context-Aware Conversations
-- Pull Request Discussion
-- Review Explanation
-- Code Suggestions
+- Context-aware Conversations
+- Review Explanations
+- AI Suggestions
+- Multi-agent Reasoning
 
 ---
 
-# 🏗 Architecture
+# 🏗 System Architecture
 
 ```
-                     GitHub API
-                          │
-                          │
-                Repository / PR Data
-                          │
-                          ▼
-
-              FastAPI / Express Backend
-        Authentication • REST APIs • Database
-
-              │                    │
-              │                    │
-
-              ▼                    ▼
-
-      PostgreSQL Database     AI Service
-
+                 GitHub API
+                      │
+      OAuth • Repositories • Pull Requests
+                      │
+                      ▼
+              Express API Server
+        Authentication • REST API • JWT
+                      │
+      ┌───────────────┴───────────────┐
+      ▼                               ▼
+PostgreSQL Database          FastAPI AI Service
                                    │
                                    ▼
-
                       Multi-Agent Review Engine
-
-             Security Agent
-             Code Quality Agent
-             Performance Agent
-             Documentation Agent
-
+                    ┌─────────────────────────┐
+                    │ Security Agent          │
+                    │ Code Quality Agent      │
+                    │ Documentation Agent     │
+                    │ Performance Agent       │
+                    └─────────────────────────┘
                                    │
-
                                    ▼
-
-                          OpenAI / LLM
-
+                           OpenAI / Ollama
                                    │
-
                                    ▼
-
-                        Final Review Report
-
+                         AI Review Report
                                    │
-
                                    ▼
-
-                          React Frontend
+                         React Frontend
 ```
 
 ---
 
-# 🚀 Tech Stack
+# 🛠 Tech Stack
 
 ## Frontend
 
-- React
+- React 19
 - TypeScript
 - Vite
 - Tailwind CSS
-- React Query
+- TanStack Query
 - React Router
 - Recharts
+- Framer Motion
 
 ---
 
 ## Backend
 
-- FastAPI
 - Express.js
-- Node.js
+- TypeScript
 - JWT Authentication
+- GitHub OAuth
+- Drizzle ORM
 
 ---
 
-## AI
+## AI Service
 
+- FastAPI
+- Python
 - OpenAI
+- LangGraph
 - Multi-Agent Architecture
-- Prompt Engineering
 - Streaming Responses
 
 ---
@@ -181,69 +179,53 @@ AI-powered code review platform that analyzes pull requests, detects bugs, ident
 
 ---
 
-## DevOps
+## Testing
 
-- Docker
-- GitHub Actions
 - Vitest
 - Pytest
 
 ---
 
-# 📷 Screenshots
+# 📸 Screenshots
 
-## Landing Page
+| Landing | Dashboard |
+|---------|-----------|
+| ![](./docs/screenshots/landing.png) | ![](./docs/screenshots/dashboard.png) |
 
-<img src="./docs/screenshots/landing.png"/>
+| Repositories | AI Review |
+|--------------|-----------|
+| ![](./docs/screenshots/repositories.png) | ![](./docs/screenshots/review.png) |
 
----
-
-## Dashboard
-
-<img src="./docs/screenshots/dashboard.png"/>
-
----
-
-## Repository Analysis
-
-<img src="./docs/screenshots/repositories.png"/>
+| Security | Analytics |
+|----------|-----------|
+| ![](./docs/screenshots/security.png) | ![](./docs/screenshots/analytics.png) |
 
 ---
 
-## AI Review
+# 📁 Project Structure
 
-<img src="./docs/screenshots/review.png"/>
-
----
-
-## Security Dashboard
-
-<img src="./docs/screenshots/security.png"/>
-
----
-
-# 📂 Project Structure
-
-```
+```text
 AI-Code-Review-Assistant
-
-artifacts/
 │
-├── ai-code-review/      # React Frontend
-├── api-server/          # Express Backend
-├── ai-service/          # FastAPI AI Service
+├── artifacts
+│   ├── ai-code-review        # React Frontend
+│   ├── api-server            # Express Backend
+│   └── ai-service            # FastAPI AI Service
 │
-lib/
+├── lib
+│   ├── db
+│   ├── api-client-react
+│   ├── api-zod
+│   └── api-spec
 │
-├── db/
-├── api-client-react/
-├── api-zod/
-└── api-spec/
+└── docs
+    ├── banner.png
+    └── screenshots
 ```
 
 ---
 
-# ⚙ Installation
+# ⚙️ Installation
 
 ```bash
 git clone https://github.com/prvsh77/AI-Code-Review-Assistant.git
@@ -255,9 +237,9 @@ pnpm install
 
 ---
 
-## Configure Environment
+# 🔧 Environment Variables
 
-Create:
+Create the following files:
 
 ```
 artifacts/api-server/.env
@@ -271,36 +253,46 @@ Example:
 
 ```env
 DATABASE_URL=
-
 JWT_SECRET=
-
 OPENAI_API_KEY=
-
 GITHUB_CLIENT_ID=
-
 GITHUB_CLIENT_SECRET=
 ```
 
 ---
 
-# ▶ Run
+# ▶ Running Locally
 
-Backend
+### Backend
 
 ```bash
-pnpm --filter api-server start
+cd artifacts/api-server
+
+pnpm build
+
+pnpm start
 ```
 
-Frontend
+### AI Service
 
 ```bash
-pnpm --filter ai-code-review dev
-```
+cd artifacts/ai-service
 
-AI Service
+python -m venv .venv
 
-```bash
+.\.venv\Scripts\activate
+
+pip install -r requirements.txt
+
 python main.py
+```
+
+### Frontend
+
+```bash
+cd artifacts/ai-code-review
+
+pnpm dev
 ```
 
 ---
@@ -313,7 +305,15 @@ Backend
 pnpm test
 ```
 
-Python
+Frontend
+
+```bash
+pnpm build
+
+pnpm typecheck
+```
+
+AI Service
 
 ```bash
 pytest
@@ -321,29 +321,31 @@ pytest
 
 ---
 
-# 🛣 Roadmap
+# 🗺 Roadmap
 
-- [x] Authentication
-- [x] JWT
-- [x] GitHub OAuth
-- [x] GitHub Repository Integration
-- [x] AI Review Engine
-- [x] Security Analysis
-- [x] Dashboard
-- [x] Analytics
-- [x] AI Streaming
-- [x] PostgreSQL
-- [x] Testing
+### Completed
 
-Upcoming
+- ✅ JWT Authentication
+- ✅ GitHub OAuth
+- ✅ Repository Integration
+- ✅ Pull Request Reviews
+- ✅ AI Multi-Agent Workflow
+- ✅ Security Analysis
+- ✅ Analytics Dashboard
+- ✅ AI Streaming
+- ✅ PostgreSQL Integration
+- ✅ Automated Testing
 
-- [ ] GitHub Webhooks
-- [ ] Team Collaboration
-- [ ] Slack Notifications
-- [ ] Azure DevOps Support
-- [ ] GitLab Support
-- [ ] Review Comparison
-- [ ] AI Cost Dashboard
+### Future Enhancements
+
+- GitHub Webhooks
+- Team Workspaces
+- Slack Notifications
+- GitLab Integration
+- Azure DevOps Integration
+- AI Cost Dashboard
+- Organization Analytics
+- Review Comparison
 
 ---
 
@@ -357,6 +359,6 @@ MIT License
 
 ### ⭐ If you found this project useful, consider giving it a star!
 
-Built with ❤️ using React, FastAPI, PostgreSQL, and Large Language Models.
+Built with ❤️ using React, FastAPI, PostgreSQL, TypeScript, and Large Language Models.
 
 </div>
