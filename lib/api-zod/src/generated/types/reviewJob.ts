@@ -13,4 +13,6 @@ export interface ReviewJob {
   status: string;
   progress?: number;
   agents?: AgentStatus[];
+  reviewId?: number;
+  error?: string;
 }

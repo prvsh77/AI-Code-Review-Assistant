@@ -26,11 +26,14 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.3 } }
 };
 
+import { normalizeArray } from "@/lib/utils";
+
 export default function Repositories() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("All");
   const { data: repos, isLoading } = useListRepositories({ search: search || undefined }, { query: { queryKey: getListRepositoriesQueryKey({ search: search || undefined }) } });
 
+  const reposData = normalizeArray<any>(repos, "Repositories");
   const tabs = ["All", "Python", "TypeScript", "Go", "Rust", "JavaScript"];
 
   const getLanguageIcon = (lang: string) => {
@@ -45,7 +48,7 @@ export default function Repositories() {
     }
   };
 
-  const filteredRepos = repos?.filter(r => activeTab === "All" || r.language.toLowerCase() === activeTab.toLowerCase());
+  const filteredRepos = reposData.filter(r => r && r.language && (activeTab === "All" || r.language.toLowerCase() === activeTab.toLowerCase()));
 
   return (
     <AppLayout>

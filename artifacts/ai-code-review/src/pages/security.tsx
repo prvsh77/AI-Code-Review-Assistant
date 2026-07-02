@@ -10,6 +10,7 @@ import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import React from "react";
+import { normalizeArray } from "@/lib/utils";
 
 const container = {
   hidden: { opacity: 0 },
@@ -29,6 +30,7 @@ export default function Security() {
   
   const queryParams = severityFilter !== "all" ? { severity: severityFilter as any } : {};
   const { data: issues, isLoading: issuesLoading } = useListSecurityIssues(queryParams, { query: { queryKey: getListSecurityIssuesQueryKey(queryParams) } });
+  const issuesData = normalizeArray<any>(issues, "SecurityIssues");
 
   const getSeverityStyle = (severity: string) => {
     switch (severity) {
@@ -130,7 +132,7 @@ export default function Security() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {issues.map((issue) => {
+                      {issuesData.map((issue) => {
                         const style = getSeverityStyle(issue.severity);
                         const isExpanded = expandedIssue === issue.id;
                         
@@ -190,10 +192,10 @@ export default function Security() {
                                               <span className="text-[#ff7b72]">import</span> {"{ escape }"} <span className="text-[#ff7b72]">from</span> <span className="text-[#a5d6ff]">'sql-template-strings'</span>;
                                               <br/><br/>
                                               <span className="text-[#8b949e] italic">// Change this:</span><br/>
-                                              <span className="text-red-400 bg-red-900/20 line-through decoration-red-500/50">const query = `SELECT * FROM users WHERE id = ${"$"}{id}`;</span><br/>
+                                              <span className="text-red-400 bg-red-900/20 line-through decoration-red-500/50">{"const query = `SELECT * FROM users WHERE id = ${id}`;"}</span><br/>
                                               <br/>
                                               <span className="text-[#8b949e] italic">// To this:</span><br/>
-                                              <span className="text-green-400 bg-green-900/20">const query = SQL`SELECT * FROM users WHERE id = ${"$"}{id}`;</span>
+                                              <span className="text-green-400 bg-green-900/20">{"const query = SQL`SELECT * FROM users WHERE id = ${id}`;"}</span>
                                             </div>
                                           </div>
                                         </div>

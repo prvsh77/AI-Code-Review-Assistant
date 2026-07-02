@@ -8,7 +8,7 @@ const router = Router();
 router.get("/user/profile", async (_req, res) => {
   const [user] = await db.select().from(usersTable).limit(1);
   if (!user) {
-    return res.json({
+    res.json({
       id: 1,
       name: "John Doe",
       email: "john@example.com",
@@ -20,6 +20,7 @@ router.get("/user/profile", async (_req, res) => {
       totalReviews: 156,
       totalRepositories: 12,
     });
+    return;
   }
   res.json({
     id: user.id,

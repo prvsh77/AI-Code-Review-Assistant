@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useGetUserProfile, useLogout } from "@workspace/api-client-react";
+import { tokenStore } from "@/lib/tokenStore";
 import { AiChatWidget } from "@/components/AiChatWidget";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -46,8 +48,30 @@ const navItems = [
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { data: userProfile } = useGetUserProfile();
+  const logoutMutation = useLogout();
+
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined as any, {
+      onSettled: () => {
+        tokenStore.setToken(null);
+        setLocation("/login");
+      }
+    });
+  };
+
+  const name = userProfile?.name || "User";
+  const email = userProfile?.email || "";
+  const username = userProfile?.githubUsername ? `@${userProfile.githubUsername}` : "";
+  const avatarUrl = userProfile?.avatarUrl || "";
+  const initials = name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   useEffect(() => {
     const stored = localStorage.getItem("sidebar-collapsed");
@@ -157,13 +181,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="p-2 border-t border-border/50">
           <Link href="/profile" className={`flex items-center gap-3 rounded-md transition-colors hover:bg-muted/50 ${isCollapsed ? "justify-center p-2" : "p-2"}`}>
             <Avatar className="h-8 w-8 border border-border flex-shrink-0">
-              <AvatarImage src="" />
-              <AvatarFallback className="bg-primary/20 text-primary text-xs">JD</AvatarFallback>
+              <AvatarImage src={avatarUrl} />
+              <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
             </Avatar>
             {!isCollapsed && (
               <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-medium leading-none truncate">John Doe</span>
-                <span className="text-xs text-muted-foreground mt-1 font-mono truncate">@johndoe</span>
+                <span className="text-sm font-medium leading-none truncate">{name}</span>
+                <span className="text-xs text-muted-foreground mt-1 font-mono truncate">{username}</span>
               </div>
             )}
           </Link>
@@ -208,14 +232,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenu>
               <DropdownMenuTrigger className="outline-none">
                 <Avatar className="h-8 w-8 border border-border cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
-                  <AvatarFallback className="bg-primary/20 text-primary text-xs">JD</AvatarFallback>
+                  <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-card border-border">
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-0.5">
-                    <p className="text-sm font-medium leading-none">John Doe</p>
-                    <p className="text-xs text-muted-foreground">john@acme.corp</p>
+                    <p className="text-sm font-medium leading-none">{name}</p>
+                    <p className="text-xs text-muted-foreground">{email}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator className="bg-border/50" />
@@ -226,7 +250,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <Link href="/settings"><Settings className="mr-2 h-4 w-4" /> Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem className="text-destructive cursor-pointer focus:bg-destructive/10 focus:text-destructive">
+                <DropdownMenuItem 
+                  className="text-destructive cursor-pointer focus:bg-destructive/10 focus:text-destructive"
+                  onClick={handleLogout}
+                >
                   <LogOut className="mr-2 h-4 w-4" /> Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>

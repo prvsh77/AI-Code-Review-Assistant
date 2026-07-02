@@ -17,6 +17,13 @@ export const reviewsTable = pgTable("reviews", {
   aiSummary: text("ai_summary"),
   topIssues: text("top_issues"),
   reviewedAt: timestamp("reviewed_at").notNull().defaultNow(),
+  modelUsed: text("model_used"),
+  inputTokens: integer("input_tokens"),
+  outputTokens: integer("output_tokens"),
+  cost: numeric("cost"),
+  agentOutputs: text("agent_outputs"),
+  promptTemplates: text("prompt_templates"),
+  latencyMs: integer("latency_ms"),
 });
 
 export const insertReviewSchema = createInsertSchema(reviewsTable).omit({ id: true, reviewedAt: true });

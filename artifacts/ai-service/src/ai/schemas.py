@@ -121,6 +121,13 @@ class FullReviewResult(BaseModel):
     top_issues: list[str]
     review_time_ms: int
     cached: bool = False
+    model_used: str | None = None
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    cost: float | None = None
+    agent_logs: dict[str, Any] | None = None
+    prompt_templates: dict[str, str] | None = None
+    prompt_version: str | None = None
 
 
 class ChatMessage(BaseModel):

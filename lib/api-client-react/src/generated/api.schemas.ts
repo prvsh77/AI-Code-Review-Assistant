@@ -5,6 +5,11 @@
  * AI Code Review Assistant API
  * OpenAPI spec version: 0.1.0
  */
+export interface GithubAuthRequest {
+  code: string;
+  redirectUri?: string;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -86,6 +91,8 @@ export interface ReviewJob {
   status: string;
   progress?: number;
   agents?: AgentStatus[];
+  reviewId?: number;
+  error?: string;
 }
 
 export interface Review {
@@ -105,6 +112,20 @@ export interface Review {
   /** @nullable */
   aiSummary?: string | null;
   topIssues?: string[];
+  /** @nullable */
+  modelUsed?: string | null;
+  /** @nullable */
+  inputTokens?: number | null;
+  /** @nullable */
+  outputTokens?: number | null;
+  /** @nullable */
+  cost?: number | null;
+  /** @nullable */
+  agentOutputs?: string | null;
+  /** @nullable */
+  promptTemplates?: string | null;
+  /** @nullable */
+  latencyMs?: number | null;
 }
 
 export type ReviewFileStatus = typeof ReviewFileStatus[keyof typeof ReviewFileStatus];
@@ -123,6 +144,8 @@ export interface ReviewFile {
   additions: number;
   deletions: number;
   status: ReviewFileStatus;
+  /** @nullable */
+  content?: string | null;
 }
 
 export type ReviewCommentType = typeof ReviewCommentType[keyof typeof ReviewCommentType];
@@ -269,6 +292,27 @@ export interface ReviewHistoryItem {
   reviewedAt: string;
   /** @nullable */
   author?: string | null;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: UserProfile;
+}
+
+export interface SuccessResponse {
+  success: boolean;
 }
 
 export type ListRepositoriesParams = {

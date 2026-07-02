@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { TerminalSquare, ChevronRight, Shield, Zap, BookOpen, Code2, Play, Users, GitPullRequest } from "lucide-react";
+import { TerminalSquare, ChevronRight, Shield, Zap, BookOpen, Code2, Play, Users, GitPullRequest, CheckSquare } from "lucide-react";
 import { SiGithub } from "react-icons/si";
 import { motion } from "framer-motion";
 
@@ -274,23 +274,4 @@ export default function Landing() {
   );
 }
 
-// Dummy CheckSquare since it was missing import
-function CheckSquare(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="9 11 12 14 22 4" />
-      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-    </svg>
-  );
-}
+

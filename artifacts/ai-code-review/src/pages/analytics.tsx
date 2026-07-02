@@ -6,6 +6,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsToolti
 import { format } from "date-fns";
 import { Activity, Code, ShieldCheck, Zap, ArrowUpRight, ArrowDownRight, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
+import { normalizeArray } from "@/lib/utils";
 
 const container = {
   hidden: { opacity: 0 },
@@ -21,6 +22,9 @@ export default function Analytics() {
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats({ query: { queryKey: getGetDashboardStatsQueryKey() } });
   const { data: trend, isLoading: trendLoading } = useGetQualityTrend({ days: 30 }, { query: { queryKey: getGetQualityTrendQueryKey({ days: 30 }) } });
   const { data: languages, isLoading: langLoading } = useGetLanguageBreakdown({ query: { queryKey: getGetLanguageBreakdownQueryKey() } });
+
+  const trendData = normalizeArray<any>(trend, "QualityTrend");
+  const languagesData = normalizeArray<any>(languages, "LanguageBreakdown");
 
   // Mock data for repo comparison
   const repoComparisonData = [
@@ -117,7 +121,7 @@ export default function Analytics() {
                     <Skeleton className="h-full w-full" />
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={trend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorQuality" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
@@ -160,7 +164,7 @@ export default function Analytics() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={languages}
+                          data={languagesData}
                           cx="50%"
                           cy="50%"
                           innerRadius={70}
@@ -170,7 +174,7 @@ export default function Analytics() {
                           nameKey="language"
                           stroke="none"
                         >
-                          {languages?.map((entry, index) => (
+                          {languagesData.map((entry: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
                           ))}
                         </Pie>

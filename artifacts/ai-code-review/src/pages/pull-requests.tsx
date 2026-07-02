@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { Link, useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
+import { normalizeArray } from "@/lib/utils";
 
 const container = {
   hidden: { opacity: 0 },
@@ -35,6 +36,8 @@ export default function PullRequests() {
     { repositoryId },
     { query: { queryKey: getListPullRequestsQueryKey({ repositoryId }) } }
   );
+
+  const prsData = normalizeArray<any>(prs, "PullRequests");
 
   const triggerReview = useTriggerReview();
 
@@ -62,7 +65,7 @@ export default function PullRequests() {
     return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">Low Risk</Badge>;
   };
 
-  const renderPRList = (filteredPRs: typeof prs) => {
+  const renderPRList = (filteredPRs: any[]) => {
     if (isLoading) {
       return (
         <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 mt-6">
@@ -189,9 +192,9 @@ export default function PullRequests() {
     );
   };
 
-  const openCount = prs?.filter(pr => pr.status === "open").length || 0;
-  const mergedCount = prs?.filter(pr => pr.status === "merged").length || 0;
-  const closedCount = prs?.filter(pr => pr.status === "closed").length || 0;
+  const openCount = prsData.filter(pr => pr && pr.status === "open").length;
+  const mergedCount = prsData.filter(pr => pr && pr.status === "merged").length;
+  const closedCount = prsData.filter(pr => pr && pr.status === "closed").length;
 
   return (
     <AppLayout>
@@ -216,13 +219,13 @@ export default function PullRequests() {
             </TabsList>
             
             <TabsContent value="open" className="m-0 focus-visible:outline-none focus-visible:ring-0">
-              {renderPRList(prs?.filter(pr => pr.status === "open"))}
+              {renderPRList(prsData.filter(pr => pr && pr.status === "open"))}
             </TabsContent>
             <TabsContent value="merged" className="m-0 focus-visible:outline-none focus-visible:ring-0">
-              {renderPRList(prs?.filter(pr => pr.status === "merged"))}
+              {renderPRList(prsData.filter(pr => pr && pr.status === "merged"))}
             </TabsContent>
             <TabsContent value="closed" className="m-0 focus-visible:outline-none focus-visible:ring-0">
-              {renderPRList(prs?.filter(pr => pr.status === "closed"))}
+              {renderPRList(prsData.filter(pr => pr && pr.status === "closed"))}
             </TabsContent>
           </Tabs>
         </motion.div>

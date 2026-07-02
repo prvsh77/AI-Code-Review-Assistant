@@ -3,46 +3,51 @@ import { useParams, Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, Loader2, Code2, ShieldAlert, Zap, BookOpen, ArrowRight } from "lucide-react";
+import { CheckCircle2, Circle, Loader2, Code2, ShieldAlert, Zap, BookOpen, ArrowRight, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useGetReviewJob, getGetReviewJobQueryKey } from "@workspace/api-client-react";
 
 const agents = [
   { name: "Code Quality Agent", id: "quality", icon: Code2, task: "Analyzing logic patterns and style..." },
-  { name: "Security Agent", id: "security", icon: ShieldAlert, task: "Scanning 14 files for vulnerabilities..." },
+  { name: "Security Agent", id: "security", icon: ShieldAlert, task: "Scanning files for vulnerabilities..." },
   { name: "Complexity Agent", id: "complexity", icon: Zap, task: "Calculating cyclomatic complexity..." },
-  { name: "Documentation Agent", id: "documentation", icon: BookOpen, task: "Generating inline summaries..." }
+  { name: "Documentation Agent", id: "documentation", icon: BookOpen, task: "Generating summaries..." }
 ];
 
 export default function Analysis() {
   const { jobId } = useParams<{ jobId: string }>();
-  const [progress, setProgress] = useState(0);
-  const [currentAgent, setCurrentAgent] = useState(0);
-  const [completed, setCompleted] = useState(false);
   const [elapsed, setElapsed] = useState(0);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          setCompleted(true);
-          return 100;
+  // Poll the job status every 1 second while it is "analyzing"
+  const { data: job, isLoading, isError } = useGetReviewJob(jobId, {
+    query: {
+      queryKey: getGetReviewJobQueryKey(jobId),
+      refetchInterval: (query) => {
+        const data = query.state.data as any;
+        if (!data || data.status === "analyzing") {
+          return 1000;
         }
-        const newProgress = prev + 2; // Slower progress for effect
-        setCurrentAgent(Math.min(Math.floor(newProgress / 25), 3));
-        return newProgress;
-      });
-      setElapsed(e => e + 1);
-    }, 150);
+        return false;
+      }
+    }
+  });
 
+  const progress = job?.progress ?? 0;
+  const completed = job?.status === "completed";
+  const failed = job?.status === "failed";
+
+  useEffect(() => {
+    if (completed || failed) return;
+    const timer = setInterval(() => {
+      setElapsed((e) => e + 1);
+    }, 1000);
     return () => clearInterval(timer);
-  }, [jobId]);
+  }, [completed, failed]);
 
   const formatTime = (seconds: number) => {
-    const s = Math.floor(seconds / (1000/150));
-    const m = Math.floor(s / 60);
-    const secs = s % 60;
+    const m = Math.floor(seconds / 60);
+    const secs = seconds % 60;
     return `${m}:${secs.toString().padStart(2, '0')}`;
   };
 
@@ -75,6 +80,10 @@ export default function Analysis() {
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}>
                     <CheckCircle2 className="h-10 w-10 text-green-500" />
                   </motion.div>
+                ) : failed ? (
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}>
+                    <XCircle className="h-10 w-10 text-red-500" />
+                  </motion.div>
                 ) : (
                   <>
                     <span className="text-2xl font-bold font-mono tracking-tighter text-primary">{Math.floor(progress)}%</span>
@@ -85,8 +94,8 @@ export default function Analysis() {
             
             <div>
               <h1 className="text-3xl font-bold font-mono tracking-tight text-foreground flex items-center justify-center gap-2">
-                {completed ? "Analysis Complete" : "Analyzing Pull Request"}
-                {!completed && (
+                {completed ? "Analysis Complete" : failed ? "Analysis Failed" : "Analyzing Pull Request"}
+                {!completed && !failed && (
                   <motion.span 
                     animate={{ opacity: [1, 0] }} 
                     transition={{ repeat: Infinity, duration: 0.8 }}
@@ -124,66 +133,85 @@ export default function Analysis() {
               />
             </svg>
 
-            {agents.map((agent, index) => {
-              const status = 
-                completed ? "completed" :
-                index < currentAgent ? "completed" :
-                index === currentAgent ? "running" : "waiting";
+            {failed ? (
+              <div className="col-span-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl p-5 flex items-start gap-4">
+                <XCircle className="h-6 w-6 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-bold text-base mb-1">Analysis Failed</h3>
+                  <p className="opacity-90">{job?.error || "An unexpected error occurred during the multi-agent review."}</p>
+                  <Link href="/repositories">
+                    <Button variant="outline" className="mt-4 border-red-500/30 hover:bg-red-500/10 text-red-400 hover:text-red-400">
+                      Back to Repositories
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              agents.map((agent, index) => {
+                const backendAgent = job?.agents?.find(
+                  (a) => a.name.toLowerCase().includes(agent.id) || a.name.toLowerCase().includes(agent.name.split(" ")[0].toLowerCase())
+                );
+                
+                const status = completed ? "completed" : (backendAgent?.status || "waiting");
+                const AgentIcon = agent.icon;
+                const agentProgress = status === "completed" ? 100 : status === "running" ? (backendAgent?.progress || 50) : 0;
 
-              const AgentIcon = agent.icon;
-              const agentProgress = status === "completed" ? 100 : status === "running" ? (progress % 25) * 4 : 0;
-
-              return (
-                <motion.div 
-                  key={agent.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className={`border-2 transition-all duration-300 ${
-                    status === "running" ? "border-primary shadow-[0_0_15px_rgba(0,188,212,0.2)] bg-card" : 
-                    status === "completed" ? "border-green-500/50 bg-card/50" : 
-                    "border-border bg-card/30 opacity-60"
-                  }`}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-lg ${
-                          status === "running" ? "bg-primary/20 text-primary" :
-                          status === "completed" ? "bg-green-500/20 text-green-500" :
-                          "bg-muted text-muted-foreground"
-                        }`}>
-                          <AgentIcon className="h-6 w-6" />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <h3 className={`font-semibold text-sm ${status === "waiting" ? "text-muted-foreground" : "text-foreground"}`}>
-                              {agent.name}
-                            </h3>
-                            {status === "completed" && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-                            {status === "running" && <Loader2 className="h-4 w-4 text-primary animate-spin" />}
+                return (
+                  <motion.div 
+                    key={agent.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className={`border-2 transition-all duration-300 ${
+                      status === "running" ? "border-primary shadow-[0_0_15px_rgba(0,188,212,0.2)] bg-card" : 
+                      status === "completed" ? "border-green-500/50 bg-card/50" : 
+                      status === "failed" ? "border-red-500/50 bg-card/50" :
+                      "border-border bg-card/30 opacity-60"
+                    }`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className={`p-3 rounded-lg ${
+                            status === "running" ? "bg-primary/20 text-primary" :
+                            status === "completed" ? "bg-green-500/20 text-green-500" :
+                            status === "failed" ? "bg-red-500/20 text-red-500" :
+                            "bg-muted text-muted-foreground"
+                          }`}>
+                            <AgentIcon className="h-6 w-6" />
                           </div>
                           
-                          <p className="text-xs text-muted-foreground truncate mb-3">
-                            {status === "completed" ? "Analysis complete." :
-                             status === "running" ? agent.task : "Waiting for dependencies..."}
-                          </p>
-                          
-                          <div className="flex items-center gap-3">
-                            <Progress value={agentProgress} className={`h-1.5 flex-1 ${
-                              status === "completed" ? "[&>div]:bg-green-500" : ""
-                            }`} />
-                            <span className="text-xs font-mono text-muted-foreground w-8 text-right">
-                              {Math.floor(agentProgress)}%
-                            </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <h3 className={`font-semibold text-sm ${status === "waiting" ? "text-muted-foreground" : "text-foreground"}`}>
+                                {agent.name}
+                              </h3>
+                              {status === "completed" && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                              {status === "failed" && <XCircle className="h-4 w-4 text-red-500" />}
+                              {status === "running" && <Loader2 className="h-4 w-4 text-primary animate-spin" />}
+                            </div>
+                            
+                            <p className="text-xs text-muted-foreground truncate mb-3">
+                              {status === "completed" ? "Analysis complete." :
+                               status === "failed" ? "Analysis failed." :
+                               status === "running" ? agent.task : "Waiting for dependencies..."}
+                            </p>
+                            
+                            <div className="flex items-center gap-3">
+                              <Progress value={agentProgress} className={`h-1.5 flex-1 ${
+                                status === "completed" ? "[&>div]:bg-green-500" : status === "failed" ? "[&>div]:bg-red-500" : ""
+                              }`} />
+                              <span className="text-xs font-mono text-muted-foreground w-8 text-right">
+                                {Math.floor(agentProgress)}%
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })
+            )}
           </div>
 
           {completed && (
@@ -193,7 +221,7 @@ export default function Analysis() {
               transition={{ delay: 0.5, type: "spring", bounce: 0.4 }}
               className="flex justify-center mt-8"
             >
-              <Link href={`/review/1`}>
+              <Link href={`/review/${job?.reviewId}`}>
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 h-14 shadow-[0_0_30px_rgba(0,188,212,0.3)] hover:scale-105 transition-transform">
                   View Full Report
                   <ArrowRight className="ml-2 h-5 w-5" />

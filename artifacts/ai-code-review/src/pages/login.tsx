@@ -1,11 +1,47 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { TerminalSquare, ArrowRight } from "lucide-react";
+import { TerminalSquare, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { SiGithub } from "react-icons/si";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { useLogin } from "@workspace/api-client-react";
+import { tokenStore } from "@/lib/tokenStore";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
+  const [_, setLocation] = useLocation();
+  const loginMutation = useLogin();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    loginMutation.mutate({
+      data: {
+        email,
+        password,
+        rememberMe,
+      }
+    }, {
+      onSuccess: (data) => {
+        tokenStore.setToken(data.token);
+        setLocation("/dashboard");
+      },
+      onError: (err: any) => {
+        setError(err.data?.error || "Login failed. Please check your credentials.");
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background flex text-foreground font-sans">
       {/* Left Panel - Decorative */}
@@ -19,12 +55,12 @@ export default function Login() {
               key={i}
               className="absolute h-1 w-1 bg-primary rounded-full"
               initial={{
-                x: Math.random() * window.innerWidth / 2,
-                y: Math.random() * window.innerHeight,
+                x: Math.random() * 500,
+                y: Math.random() * 800,
                 opacity: Math.random()
               }}
               animate={{
-                y: [null, Math.random() * window.innerHeight],
+                y: [null, Math.random() * 800],
                 opacity: [null, Math.random(), 0]
               }}
               transition={{
@@ -111,43 +147,110 @@ export default function Login() {
             <p className="text-muted-foreground">Sign in to your account to continue</p>
           </div>
 
-          <div className="space-y-4">
-            <Link href="/dashboard" className="block w-full">
-              <Button className="w-full bg-[#24292e] text-white hover:bg-[#24292e]/90 h-12 text-base font-medium shadow-sm transition-transform active:scale-[0.98]">
-                <SiGithub className="mr-3 h-5 w-5" />
-                Continue with GitHub
-              </Button>
-            </Link>
-
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-4 text-muted-foreground font-medium">Or continue with</span>
-              </div>
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg p-3.5 flex items-start gap-2.5">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
             </div>
+          )}
 
+          <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email Address</label>
                 <Input 
                   type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com" 
                   className="h-12 bg-card border-border focus-visible:ring-primary"
+                  disabled={loginMutation.isPending}
                 />
               </div>
-              <Link href="/dashboard" className="block w-full">
-                <Button variant="outline" className="w-full h-12 text-base font-medium border-border hover:bg-muted transition-transform active:scale-[0.98]">
-                  Sign in with Email
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Password</label>
+                <Input 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••" 
+                  className="h-12 bg-card border-border focus-visible:ring-primary"
+                  disabled={loginMutation.isPending}
+                />
+              </div>
+
+              <div className="flex items-center justify-between py-1">
+                <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                  <input 
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="accent-primary h-4 w-4 rounded border-border"
+                    disabled={loginMutation.isPending}
+                  />
+                  <span>Remember me</span>
+                </label>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert("Password reset workflow is currently simulated."); }} className="text-sm text-primary hover:underline font-medium">
+                  Forgot password?
+                </a>
+              </div>
+
+              <Button 
+                type="submit"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base font-semibold shadow-md shadow-primary/10 transition-transform active:scale-[0.98]"
+                disabled={loginMutation.isPending}
+              >
+                {loginMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-4 text-muted-foreground font-medium">Or</span>
             </div>
           </div>
 
-          <p className="text-center text-xs text-muted-foreground leading-relaxed">
-            By clicking continue, you agree to our <br/>
-            <a href="#" className="underline underline-offset-4 hover:text-foreground transition-colors">Terms of Service</a> and <a href="#" className="underline underline-offset-4 hover:text-foreground transition-colors">Privacy Policy</a>.
+          <Button 
+            className="w-full bg-[#24292e] text-white hover:bg-[#24292e]/90 h-12 text-base font-medium shadow-sm"
+            onClick={async () => {
+              try {
+                const res = await fetch(`/api/auth/github/url?origin=${window.location.origin}`);
+                const data = await res.json();
+                if (data.url) {
+                  window.location.href = data.url;
+                } else {
+                  alert(data.error || "Failed to get GitHub authorize URL. Please verify GITHUB_CLIENT_ID configuration on backend.");
+                }
+              } catch (err) {
+                alert("Failed to connect to API server.");
+              }
+            }}
+            disabled={loginMutation.isPending}
+          >
+            <SiGithub className="mr-3 h-5 w-5" />
+            Continue with GitHub
+          </Button>
+
+          <p className="text-center text-sm text-muted-foreground leading-relaxed">
+            Don't have an account?{" "}
+            <Link href="/register" className="text-primary font-semibold hover:underline">
+              Sign up
+            </Link>
           </p>
         </motion.div>
       </div>

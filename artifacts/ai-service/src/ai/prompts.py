@@ -229,3 +229,58 @@ def build_chat_prompt(message: str, code_context: str, repository: str) -> str:
         parts.append(f"Code Context:\n```\n{code_context[:3000]}\n```")
     parts.append(f"User Question: {message}")
     return "\n\n".join(parts)
+
+
+PROMPT_VERSION = "v1.0.0"
+
+COORDINATOR_SYSTEM = """You are a senior software architect orchestrating a group of specialized code analysis agents.
+Your goal is to synthesize the findings of 5 specialized agents into a single, cohesive, high-quality code review report:
+1. Reviewer Agent (general code quality, style, bugs)
+2. Security Agent (OWASP vulnerabilities)
+3. Complexity Agent (cognitive and cyclomatic complexity metrics)
+4. Documentation Agent (docstrings and comments analysis)
+5. Refactoring Agent (refactoring suggestions)
+
+Reconcile individual agent findings. Recalculate a fair and logical overall code quality score (0-100) based on all findings.
+Summarize all suggestions and highlights into a professional, cohesive executive summary (ai_summary).
+Identify the top 5 most critical/highest priority issues from all agent findings combined and put their titles/summaries in the `top_issues` list.
+
+Return ONLY a valid JSON object matching the following structure:
+{
+  "overall_score": <overall 0-100 score>,
+  "ai_summary": "<cohesive markdown-friendly summary>",
+  "top_issues": ["<critical issue 1>", "<critical issue 2>", ...]
+}
+"""
+
+def build_coordinator_prompt(
+    code: str,
+    reviewer_json: str,
+    security_json: str,
+    complexity_json: str,
+    documentation_json: str,
+    refactoring_json: str
+) -> str:
+    return f"""Source Code to review:
+```
+{code}
+```
+
+Independent Agent JSON Reports:
+
+Reviewer Agent:
+{reviewer_json}
+
+Security Agent:
+{security_json}
+
+Complexity Agent:
+{complexity_json}
+
+Documentation Agent:
+{documentation_json}
+
+Refactoring Agent:
+{refactoring_json}
+
+Perform the coordination step. Synthesize these reports and return the merged coordinator JSON."""

@@ -9,6 +9,111 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Register a new user
+ */
+export const RegisterBody = zod.object({
+  "name": zod.string(),
+  "email": zod.string(),
+  "password": zod.string()
+})
+
+export const RegisterResponse = zod.object({
+  "token": zod.string(),
+  "user": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "githubUsername": zod.string(),
+  "avatarUrl": zod.string().nullable(),
+  "company": zod.string().nullish(),
+  "timezone": zod.string().nullish(),
+  "joinedAt": zod.string(),
+  "totalReviews": zod.number().optional(),
+  "totalRepositories": zod.number().optional()
+})
+})
+
+
+/**
+ * @summary Authenticate via GitHub OAuth code
+ */
+export const GithubAuthBody = zod.object({
+  "code": zod.string(),
+  "redirectUri": zod.string().optional()
+})
+
+export const GithubAuthResponse = zod.object({
+  "token": zod.string(),
+  "user": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "githubUsername": zod.string(),
+  "avatarUrl": zod.string().nullable(),
+  "company": zod.string().nullish(),
+  "timezone": zod.string().nullish(),
+  "joinedAt": zod.string(),
+  "totalReviews": zod.number().optional(),
+  "totalRepositories": zod.number().optional()
+})
+})
+
+
+/**
+ * @summary Login user
+ */
+export const LoginBody = zod.object({
+  "email": zod.string(),
+  "password": zod.string(),
+  "rememberMe": zod.boolean().optional()
+})
+
+export const LoginResponse = zod.object({
+  "token": zod.string(),
+  "user": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "githubUsername": zod.string(),
+  "avatarUrl": zod.string().nullable(),
+  "company": zod.string().nullish(),
+  "timezone": zod.string().nullish(),
+  "joinedAt": zod.string(),
+  "totalReviews": zod.number().optional(),
+  "totalRepositories": zod.number().optional()
+})
+})
+
+
+/**
+ * @summary Logout user
+ */
+export const LogoutResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Refresh access token
+ */
+export const RefreshTokenResponse = zod.object({
+  "token": zod.string(),
+  "user": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "githubUsername": zod.string(),
+  "avatarUrl": zod.string().nullable(),
+  "company": zod.string().nullish(),
+  "timezone": zod.string().nullish(),
+  "joinedAt": zod.string(),
+  "totalReviews": zod.number().optional(),
+  "totalRepositories": zod.number().optional()
+})
+})
+
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -124,7 +229,31 @@ export const TriggerReviewResponse = zod.object({
   "name": zod.string(),
   "status": zod.enum(['waiting', 'running', 'completed', 'failed']),
   "progress": zod.number().nullish()
-})).optional()
+})).optional(),
+  "reviewId": zod.number().optional(),
+  "error": zod.string().optional()
+})
+
+
+/**
+ * @summary Get progress of a running review job
+ */
+export const GetReviewJobParams = zod.object({
+  "jobId": zod.coerce.string()
+})
+
+export const GetReviewJobResponse = zod.object({
+  "jobId": zod.string(),
+  "pullRequestId": zod.number(),
+  "status": zod.string(),
+  "progress": zod.number().optional(),
+  "agents": zod.array(zod.object({
+  "name": zod.string(),
+  "status": zod.enum(['waiting', 'running', 'completed', 'failed']),
+  "progress": zod.number().nullish()
+})).optional(),
+  "reviewId": zod.number().optional(),
+  "error": zod.string().optional()
 })
 
 
@@ -150,7 +279,14 @@ export const ListReviewsResponseItem = zod.object({
   "status": zod.string(),
   "reviewedAt": zod.string(),
   "aiSummary": zod.string().nullish(),
-  "topIssues": zod.array(zod.string()).optional()
+  "topIssues": zod.array(zod.string()).optional(),
+  "modelUsed": zod.string().nullish(),
+  "inputTokens": zod.number().nullish(),
+  "outputTokens": zod.number().nullish(),
+  "cost": zod.number().nullish(),
+  "agentOutputs": zod.string().nullish(),
+  "promptTemplates": zod.string().nullish(),
+  "latencyMs": zod.number().nullish()
 })
 export const ListReviewsResponse = zod.array(ListReviewsResponseItem)
 
@@ -176,7 +312,14 @@ export const GetReviewResponse = zod.object({
   "status": zod.string(),
   "reviewedAt": zod.string(),
   "aiSummary": zod.string().nullish(),
-  "topIssues": zod.array(zod.string()).optional()
+  "topIssues": zod.array(zod.string()).optional(),
+  "modelUsed": zod.string().nullish(),
+  "inputTokens": zod.number().nullish(),
+  "outputTokens": zod.number().nullish(),
+  "cost": zod.number().nullish(),
+  "agentOutputs": zod.string().nullish(),
+  "promptTemplates": zod.string().nullish(),
+  "latencyMs": zod.number().nullish()
 })
 
 
@@ -193,7 +336,8 @@ export const GetReviewFilesResponseItem = zod.object({
   "filePath": zod.string(),
   "additions": zod.number(),
   "deletions": zod.number(),
-  "status": zod.enum(['added', 'modified', 'deleted'])
+  "status": zod.enum(['added', 'modified', 'deleted']),
+  "content": zod.string().nullish()
 })
 export const GetReviewFilesResponse = zod.array(GetReviewFilesResponseItem)
 

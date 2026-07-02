@@ -22,6 +22,89 @@ tags:
   - name: user
     description: User operations
 paths:
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "200":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/github:
+    post:
+      operationId: githubAuth
+      tags: [auth]
+      summary: Authenticate via GitHub OAuth code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GithubAuthRequest"
+      responses:
+        "200":
+          description: GitHub authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout user
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      tags: [auth]
+      summary: Refresh access token
+      responses:
+        "200":
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
   /healthz:
     get:
       operationId: healthCheck
@@ -136,6 +219,25 @@ paths:
       responses:
         "202":
           description: Review triggered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewJob"
+
+  /pull-requests/jobs/{jobId}:
+    get:
+      operationId: getReviewJob
+      tags: [pullRequests]
+      summary: Get progress of a running review job
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Job details
           content:
             application/json:
               schema:
@@ -366,6 +468,15 @@ paths:
 
 components:
   schemas:
+    GithubAuthRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+        redirectUri:
+          type: string
+
     HealthStatus:
       type: object
       properties:
@@ -446,6 +557,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/AgentStatus"
+        reviewId:
+          type: integer
+        error:
+          type: string
 
     AgentStatus:
       type: object
@@ -493,6 +608,20 @@ components:
           type: array
           items:
             type: string
+        modelUsed:
+          type: ["string", "null"]
+        inputTokens:
+          type: ["integer", "null"]
+        outputTokens:
+          type: ["integer", "null"]
+        cost:
+          type: ["number", "null"]
+        agentOutputs:
+          type: ["string", "null"]
+        promptTemplates:
+          type: ["string", "null"]
+        latencyMs:
+          type: ["integer", "null"]
 
     ReviewFile:
       type: object
@@ -511,6 +640,8 @@ components:
         status:
           type: string
           enum: [added, modified, deleted]
+        content:
+          type: ["string", "null"]
 
     ReviewComment:
       type: object
@@ -679,3 +810,41 @@ components:
           type: string
         author:
           type: ["string", "null"]
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        rememberMe:
+          type: boolean
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserProfile"
+
+    SuccessResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean

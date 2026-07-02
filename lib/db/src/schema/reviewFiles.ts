@@ -9,6 +9,7 @@ export const reviewFilesTable = pgTable("review_files", {
   additions: integer("additions").notNull().default(0),
   deletions: integer("deletions").notNull().default(0),
   status: text("status").notNull().default("modified"),
+  content: text("content"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ScoreRing } from "@/components/ui/score-ring";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { normalizeArray } from "@/lib/utils";
 
 const container = {
   hidden: { opacity: 0 },
@@ -29,10 +30,21 @@ const item = {
 };
 
 export default function Dashboard() {
+
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats({ query: { queryKey: getGetDashboardStatsQueryKey() } });
   const { data: trend, isLoading: trendLoading } = useGetQualityTrend({}, { query: { queryKey: getGetQualityTrendQueryKey({}) } });
-  const { data: languages, isLoading: langLoading } = useGetLanguageBreakdown({ query: { queryKey: getGetLanguageBreakdownQueryKey() } });
+  const { data: languagesResponse, isLoading: langLoading } =
+    useGetLanguageBreakdown({
+      query: {
+        queryKey: getGetLanguageBreakdownQueryKey(),
+      },
+    });
+
+  const languageData = normalizeArray<{ language: string; percentage: number }>(languagesResponse, "LanguageBreakdown");
+  const trendData = normalizeArray<{ date: string; qualityScore: number; securityScore: number }>(trend, "QualityTrend");
   const { data: reviews, isLoading: reviewsLoading } = useListReviews({ limit: 5 }, { query: { queryKey: getListReviewsQueryKey({ limit: 5 }) } });
+  const reviewData = normalizeArray<any>(reviews, "RecentReviews");
+
 
   const scoreColor = (score: number) => {
     if (score >= 85) return "bg-green-500/10 text-green-500 border-green-500/20";
@@ -55,27 +67,27 @@ export default function Dashboard() {
 
         {/* Stats Row */}
         <motion.div variants={item} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <MetricCard 
-            title="Total Repositories" 
-            value={statsLoading ? "-" : stats?.totalRepositories || 0} 
-            icon={FolderGit2} 
-            trend={12} 
+          <MetricCard
+            title="Total Repositories"
+            value={statsLoading ? "-" : stats?.totalRepositories || 0}
+            icon={FolderGit2}
+            trend={12}
             color="primary"
             trendLabel="this week"
           />
-          <MetricCard 
-            title="Pull Requests" 
-            value={statsLoading ? "-" : stats?.totalPullRequests || 0} 
-            icon={GitPullRequest} 
-            trend={5} 
+          <MetricCard
+            title="Pull Requests"
+            value={statsLoading ? "-" : stats?.totalPullRequests || 0}
+            icon={GitPullRequest}
+            trend={5}
             color="blue"
             trendLabel="this week"
           />
-          <MetricCard 
-            title="Files Reviewed" 
-            value={statsLoading ? "-" : stats?.filesReviewed || 0} 
-            icon={FileCode2} 
-            trend={-2} 
+          <MetricCard
+            title="Files Reviewed"
+            value={statsLoading ? "-" : stats?.filesReviewed || 0}
+            icon={FileCode2}
+            trend={-2}
             color="yellow"
             trendLabel="this week"
           />
@@ -104,21 +116,21 @@ export default function Dashboard() {
                   <Skeleton className="h-full w-full" />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={trend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                    <AreaChart data={trendData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorQuality" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="colorSecurity" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                       <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(val) => format(new Date(val), 'MMM d')} axisLine={false} tickLine={false} />
                       <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} domain={[0, 100]} axisLine={false} tickLine={false} />
-                      <RechartsTooltip 
+                      <RechartsTooltip
                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
                         labelFormatter={(val) => format(new Date(val), 'MMM d, yyyy')}
                       />
@@ -142,17 +154,17 @@ export default function Dashboard() {
                   <Skeleton className="h-full w-full" />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={languages} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <BarChart data={languageData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={true} vertical={false} />
                       <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} axisLine={false} tickLine={false} />
                       <YAxis dataKey="language" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} axisLine={false} tickLine={false} />
-                      <RechartsTooltip 
+                      <RechartsTooltip
                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
                         formatter={(val) => [`${val}%`, 'Usage']}
                         cursor={{ fill: 'hsl(var(--muted)/0.3)' }}
                       />
                       <Bar dataKey="percentage" radius={[0, 4, 4, 0]} barSize={20}>
-                        {languages?.map((entry, index) => (
+                        {languageData?.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${(index % 5) + 1}))`} />
                         ))}
                       </Bar>
@@ -185,12 +197,12 @@ export default function Dashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reviews?.map((review) => (
+                    {reviewData.map((review) => (
                       <TableRow key={review.id} className="border-border/50 hover:bg-muted/30 transition-colors">
                         <TableCell className="pl-6">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8 border border-border">
-                              <AvatarFallback className="bg-primary/10 text-primary text-xs">{review.author.substring(0,2).toUpperCase()}</AvatarFallback>
+                              <AvatarFallback className="bg-primary/10 text-primary text-xs">{review.author ? review.author.substring(0, 2).toUpperCase() : "U"}</AvatarFallback>
                             </Avatar>
                             <span className="font-mono text-primary bg-primary/10 px-2 py-1 rounded-md text-xs">#{review.pullRequestNumber}</span>
                           </div>
@@ -211,7 +223,7 @@ export default function Dashboard() {
                         </TableCell>
                       </TableRow>
                     ))}
-                    {reviews?.length === 0 && (
+                    {reviewData.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                           No recent reviews found
@@ -223,7 +235,7 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-          
+
           <Card className="bg-card/50 border-border/50 shadow-sm flex flex-col">
             <CardHeader className="bg-muted/10 border-b border-border/50 pb-4">
               <CardTitle>Recent AI Suggestions</CardTitle>

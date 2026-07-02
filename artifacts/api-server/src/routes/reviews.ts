@@ -31,6 +31,15 @@ router.get("/reviews/history", async (req, res) => {
   );
 });
 
+const safeJsonParse = (str: string | null) => {
+  if (!str) return [];
+  try {
+    return JSON.parse(str);
+  } catch {
+    return [];
+  }
+};
+
 router.get("/reviews", async (req, res) => {
   const { repositoryId, limit } = req.query as { repositoryId?: string; limit?: string };
   const lim = limit ? parseInt(limit, 10) : 20;
@@ -51,7 +60,7 @@ router.get("/reviews", async (req, res) => {
     status: r.status,
     reviewedAt: r.reviewedAt.toISOString(),
     aiSummary: r.aiSummary,
-    topIssues: r.topIssues ? JSON.parse(r.topIssues) : [],
+    topIssues: safeJsonParse(r.topIssues),
   }));
 
   res.json(result);
@@ -59,10 +68,16 @@ router.get("/reviews", async (req, res) => {
 
 router.get("/reviews/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
 
   const [row] = await db.select().from(reviewsTable).where(eq(reviewsTable.id, id));
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
 
   res.json({
     id: row.id,
@@ -78,13 +93,23 @@ router.get("/reviews/:id", async (req, res) => {
     status: row.status,
     reviewedAt: row.reviewedAt.toISOString(),
     aiSummary: row.aiSummary,
-    topIssues: row.topIssues ? JSON.parse(row.topIssues) : [],
+    topIssues: safeJsonParse(row.topIssues),
+    modelUsed: row.modelUsed,
+    inputTokens: row.inputTokens,
+    outputTokens: row.outputTokens,
+    cost: row.cost ? parseFloat(row.cost as string) : null,
+    agentOutputs: row.agentOutputs ? JSON.parse(row.agentOutputs) : null,
+    promptTemplates: row.promptTemplates ? JSON.parse(row.promptTemplates) : null,
+    latencyMs: row.latencyMs,
   });
 });
 
 router.get("/reviews/:id/files", async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
 
   const rows = await db.select().from(reviewFilesTable).where(eq(reviewFilesTable.reviewId, id));
   res.json(
@@ -95,13 +120,17 @@ router.get("/reviews/:id/files", async (req, res) => {
       additions: r.additions,
       deletions: r.deletions,
       status: r.status,
+      content: r.content,
     }))
   );
 });
 
 router.get("/reviews/:id/comments", async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
 
   const rows = await db.select().from(reviewCommentsTable).where(eq(reviewCommentsTable.reviewId, id));
   res.json(

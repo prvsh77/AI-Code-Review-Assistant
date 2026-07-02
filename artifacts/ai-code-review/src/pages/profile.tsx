@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Github, FolderGit2, GitPullRequest, ShieldAlert, CheckCircle2, MapPin, Building, Calendar, Mail, Activity, Code2 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { normalizeArray } from "@/lib/utils";
 
 const container = {
   hidden: { opacity: 0 },
@@ -21,6 +22,8 @@ const item = {
 export default function Profile() {
   const { data: profile, isLoading: profileLoading } = useGetUserProfile({ query: { queryKey: getGetUserProfileQueryKey() } });
   const { data: activities, isLoading: activitiesLoading } = useGetUserActivity({ query: { queryKey: getGetUserActivityQueryKey() } });
+
+  const activitiesData = normalizeArray<any>(activities, "UserActivities");
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -147,9 +150,9 @@ export default function Profile() {
                         </div>
                       ))}
                     </div>
-                  ) : activities && activities.length > 0 ? (
+                  ) : activitiesData && activitiesData.length > 0 ? (
                     <div className="space-y-8 relative before:absolute before:inset-0 before:ml-[19px] before:-translate-x-px before:h-full before:w-0.5 before:bg-border/50">
-                      {activities.map((activity) => (
+                      {activitiesData.map((activity) => (
                         <div key={activity.id} className="relative flex items-start gap-6 group">
                           <div className="relative z-10 shrink-0 mt-1 shadow-sm transition-transform group-hover:scale-110">
                             {getActivityIcon(activity.type)}

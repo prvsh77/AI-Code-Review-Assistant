@@ -8,7 +8,8 @@ import { FileCode2, MessageSquare, AlertTriangle, Info, Zap, ShieldAlert, Check,
 import { useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "react-day-picker";
+import { Button } from "@/components/ui/button";
+import { normalizeArray } from "@/lib/utils";
 
 export default function ReviewCode() {
   const { id } = useParams<{ id: string }>();
@@ -19,17 +20,20 @@ export default function ReviewCode() {
   const { data: files, isLoading: filesLoading } = useGetReviewFiles(reviewId, { query: { queryKey: getGetReviewFilesQueryKey(reviewId) } });
   const { data: comments, isLoading: commentsLoading } = useGetReviewComments(reviewId, { query: { queryKey: getGetReviewCommentsQueryKey(reviewId) } });
 
+  const filesData = normalizeArray<any>(files, "ReviewFiles");
+  const commentsData = normalizeArray<any>(comments, "ReviewComments");
+
   const [selectedFile, setSelectedFile] = useState<string | null>(initialFile || null);
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
 
   // If no file selected but files loaded, select first file
   useMemo(() => {
-    if (!selectedFile && files && files.length > 0) {
-      setSelectedFile(files[0].filePath);
+    if (!selectedFile && filesData && filesData.length > 0) {
+      setSelectedFile(filesData[0].filePath);
     }
-  }, [files, selectedFile]);
+  }, [filesData, selectedFile]);
 
-  const currentFileComments = comments?.filter(c => c.filePath === selectedFile) || [];
+  const currentFileComments = commentsData.filter(c => c && c.filePath === selectedFile);
 
   const getSeverityIcon = (severity: string) => {
     switch(severity) {
@@ -51,6 +55,9 @@ export default function ReviewCode() {
     }
   };
 
+  const selectedFileObj = filesData.find((f: any) => f && f.filePath === selectedFile);
+  const codeLines = selectedFileObj?.content ? selectedFileObj.content.split("\n") : [];
+
   return (
     <AppLayout>
       <div className="h-[calc(100vh-6rem)] flex flex-col pt-2">
@@ -67,16 +74,19 @@ export default function ReviewCode() {
                 </div>
               ) : (
                 <div className="py-2">
-                  {files?.map(file => {
-                    const fileComments = comments?.filter(c => c.filePath === file.filePath) || [];
-                    const hasError = fileComments.some(c => c.severity === 'critical' || c.severity === 'high');
-                    const hasWarn = fileComments.some(c => c.severity === 'medium');
+                  {filesData.map(file => {
+                    const fileComments = commentsData.filter(c => c && c.filePath === file.filePath);
+                    const hasError = fileComments.some(c => c && (c.severity === 'critical' || c.severity === 'high'));
+                    const hasWarn = fileComments.some(c => c && c.severity === 'medium');
                     const isSelected = selectedFile === file.filePath;
                     
                     return (
                       <button
                         key={file.id}
-                        onClick={() => setSelectedFile(file.filePath)}
+                        onClick={() => {
+                          setSelectedFile(file.filePath);
+                          setSelectedLine(null);
+                        }}
                         className={`w-full flex items-center px-3 py-2 text-sm transition-all relative ${
                           isSelected 
                             ? 'bg-primary/10 text-primary font-medium border-r-2 border-primary' 
@@ -115,8 +125,8 @@ export default function ReviewCode() {
                 <span className="text-foreground font-semibold ml-0.5">{selectedFile?.split('/').pop()}</span>
               </div>
               <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
-                <span className="text-green-500">+24</span>
-                <span className="text-red-500">-12</span>
+                <span className="text-green-500">+{selectedFileObj?.additions || 0}</span>
+                <span className="text-red-500">-{selectedFileObj?.deletions || 0}</span>
               </div>
             </div>
             <ScrollArea className="flex-1">
@@ -126,35 +136,45 @@ export default function ReviewCode() {
                 </div>
               ) : (
                 <div className="font-mono text-[13px] leading-[22px] text-[#e6edf3] pb-10 pt-2 whitespace-pre">
-                  {/* Mocked code lines... */}
-                  <div className="flex group hover:bg-[#21262d]/50 cursor-text pr-4">
-                    <div className="w-12 flex-shrink-0 text-right pr-4 text-[#6e7681] select-none border-r border-transparent">1</div>
-                    <div className="pl-4"><span className="text-[#ff7b72]">import</span> <span className="text-[#e6edf3]">{" { useState } "}</span> <span className="text-[#ff7b72]">from</span> <span className="text-[#a5d6ff]">"react"</span>;</div>
-                  </div>
-                  <div className="flex group hover:bg-[#21262d]/50 cursor-text pr-4">
-                    <div className="w-12 flex-shrink-0 text-right pr-4 text-[#6e7681] select-none border-r border-transparent">2</div>
-                  </div>
-                  
-                  {/* A line with an issue */}
-                  <div 
-                    onClick={() => setSelectedLine(3)}
-                    className={`flex group cursor-pointer pr-4 transition-colors ${selectedLine === 3 ? 'bg-red-500/10' : 'hover:bg-[#21262d]/50'}`}
-                  >
-                    <div className={`w-12 flex-shrink-0 text-right pr-4 select-none border-r-2 flex items-center justify-end gap-1 ${selectedLine === 3 ? 'text-red-400 border-red-500' : 'text-[#6e7681] border-red-500/50 group-hover:border-red-500'}`}>
-                      <ShieldAlert className="h-3 w-3 text-red-500 absolute left-1" />
-                      3
+                  {codeLines.length === 0 ? (
+                    <div className="p-8 text-center text-muted-foreground text-sm italic">
+                      File is empty or content is loading...
                     </div>
-                    <div className="pl-4 flex-1 flex">
-                      <div className="flex-1"><span className="text-[#ff7b72]">const</span> <span className="text-[#79c0ff]">query</span> = <span className="text-[#a5d6ff]">\`SELECT * FROM users WHERE id = \${req.body.id}\`</span>;</div>
-                    </div>
-                  </div>
-                  
-                  {[...Array(40)].map((_, i) => (
-                    <div key={i+4} className="flex group hover:bg-[#21262d]/50 cursor-text pr-4">
-                      <div className="w-12 flex-shrink-0 text-right pr-4 text-[#6e7681] select-none border-r border-transparent">{i + 4}</div>
-                      <div className="pl-4 text-[#8b949e] italic">// normal code line...</div>
-                    </div>
-                  ))}
+                  ) : (
+                    codeLines.map((lineText: string, idx: number) => {
+                      const lineNum = idx + 1;
+                      const lineComment = currentFileComments.find(c => c && c.line === lineNum);
+                      const isSelected = selectedLine === lineNum;
+
+                      return (
+                        <div 
+                          key={lineNum}
+                          onClick={() => lineComment && setSelectedLine(lineNum)}
+                          className={`flex group pr-4 transition-colors ${
+                            isSelected 
+                              ? 'bg-primary/15' 
+                              : lineComment 
+                                ? 'bg-red-500/10 hover:bg-red-500/15 cursor-pointer' 
+                                : 'hover:bg-[#21262d]/50 cursor-text'
+                          }`}
+                        >
+                          <div className={`w-12 flex-shrink-0 text-right pr-4 select-none border-r-2 flex items-center justify-end gap-1 relative ${
+                            isSelected 
+                              ? 'text-primary border-primary' 
+                              : lineComment 
+                                ? 'text-red-400 border-red-500/50 group-hover:border-red-500' 
+                                : 'text-[#6e7681] border-transparent'
+                          }`}>
+                            {lineComment && <ShieldAlert className="h-3 w-3 text-red-500 absolute left-1" />}
+                            {lineNum}
+                          </div>
+                          <div className="pl-4 flex-1 whitespace-pre select-text">
+                            {lineText || " "}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               )}
             </ScrollArea>

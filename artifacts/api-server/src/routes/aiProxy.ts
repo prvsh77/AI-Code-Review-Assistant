@@ -3,7 +3,7 @@ import { logger } from "../lib/logger";
 
 const router = Router();
 
-const AI_SERVICE_URL = "http://localhost:8000";
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8085";
 
 async function proxyRequest(req: Request, res: Response): Promise<void> {
   const targetPath = "/ai" + req.path;

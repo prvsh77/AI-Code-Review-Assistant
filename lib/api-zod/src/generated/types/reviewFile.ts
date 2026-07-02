@@ -14,4 +14,6 @@ export interface ReviewFile {
   additions: number;
   deletions: number;
   status: ReviewFileStatus;
+  /** @nullable */
+  content?: string | null;
 }

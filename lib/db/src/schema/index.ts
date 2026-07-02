@@ -6,3 +6,4 @@ export * from "./reviewComments";
 export * from "./securityIssues";
 export * from "./users";
 export * from "./activityItems";
+export * from "./sessions";

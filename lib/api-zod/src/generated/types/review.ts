@@ -23,4 +23,18 @@ export interface Review {
   /** @nullable */
   aiSummary?: string | null;
   topIssues?: string[];
+  /** @nullable */
+  modelUsed?: string | null;
+  /** @nullable */
+  inputTokens?: number | null;
+  /** @nullable */
+  outputTokens?: number | null;
+  /** @nullable */
+  cost?: number | null;
+  /** @nullable */
+  agentOutputs?: string | null;
+  /** @nullable */
+  promptTemplates?: string | null;
+  /** @nullable */
+  latencyMs?: number | null;
 }

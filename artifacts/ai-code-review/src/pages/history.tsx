@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { normalizeArray } from "@/lib/utils";
 
 const container = {
   hidden: { opacity: 0 },
@@ -26,6 +27,7 @@ export default function History() {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"timeline" | "table">("timeline");
   const { data: history, isLoading } = useGetReviewHistory({ search: search || undefined }, { query: { queryKey: getGetReviewHistoryQueryKey({ search: search || undefined }) } });
+  const historyData = normalizeArray<any>(history, "ReviewHistory");
 
   const getScoreBadge = (score: number) => {
     if (score >= 85) return <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 px-2 py-0.5">{score}/100</Badge>;
@@ -48,7 +50,7 @@ export default function History() {
   };
 
   // Group history items by date
-  const groupedHistory = history?.reduce((acc: Record<string, typeof history>, item) => {
+  const groupedHistory = historyData.reduce((acc: Record<string, any[]>, item) => {
     const date = new Date(item.reviewedAt);
     let group = "";
     if (isToday(date)) group = "Today";
@@ -116,7 +118,7 @@ export default function History() {
                 ))}
               </CardContent>
             </Card>
-          ) : history && history.length > 0 ? (
+          ) : historyData && historyData.length > 0 ? (
             viewMode === "timeline" ? (
               <div className="space-y-8">
                 {Object.entries(groupedHistory || {}).map(([group, items], i) => (
@@ -124,7 +126,7 @@ export default function History() {
                     <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground pl-2">{group}</h3>
                     <Card className="bg-card border-border/60 shadow-sm overflow-hidden">
                       <div className="divide-y divide-border/50">
-                        {(items as typeof history).map((item) => (
+                        {(items as any[]).map((item) => (
                           <Link key={item.id} href={`/review/${item.id}`}>
                             <div className="p-4 sm:p-5 flex items-start sm:items-center gap-4 hover:bg-muted/10 transition-colors cursor-pointer group">
                               <div className="relative flex items-center justify-center shrink-0 w-8">
@@ -177,7 +179,7 @@ export default function History() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {history.map((item) => (
+                      {historyData.map((item) => (
                         <TableRow key={item.id} className="hover:bg-muted/20 border-border/50 cursor-pointer group" onClick={() => window.location.href=`/review/${item.id}`}>
                           <TableCell className="pl-6 font-mono text-primary font-medium">#{item.pullRequestNumber}</TableCell>
                           <TableCell className="font-semibold text-foreground">{item.repositoryName}</TableCell>

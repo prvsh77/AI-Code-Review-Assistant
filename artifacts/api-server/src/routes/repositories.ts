@@ -1,58 +1,126 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { repositoriesTable } from "@workspace/db";
-import { eq, like, sql } from "drizzle-orm";
+import { reviewsTable } from "@workspace/db";
+import { eq, desc } from "drizzle-orm";
+import { requireGitHubToken, AuthenticatedRequest } from "../middlewares/auth";
+import { listRepositories, getRepositoryById } from "../lib/github";
 
 const router = Router();
 
-router.get("/repositories", async (req, res) => {
+// Helper to format Date as "X time ago" or similar simple format
+function formatReviewedAt(date: Date): string {
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / (60 * 1000));
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
+
+router.get("/repositories", requireGitHubToken as any, async (req: AuthenticatedRequest, res) => {
   const { language, search } = req.query as { language?: string; search?: string };
+  const token = req.githubToken!;
 
-  let rows = await db.select().from(repositoriesTable);
+  try {
+    // 1. Fetch live repositories from GitHub
+    let repos = await listRepositories(token, search);
 
-  if (language && language !== "all") {
-    rows = rows.filter((r) => r.language.toLowerCase() === language.toLowerCase());
+    // 2. Filter by language if requested
+    if (language && language !== "all" && language !== "All") {
+      repos = repos.filter(
+        (r) => r.language && r.language.toLowerCase() === language.toLowerCase()
+      );
+    }
+
+    // 3. Map repositories and resolve their review history from database
+    const result = await Promise.all(
+      repos.map(async (r) => {
+        // Query database for latest review of this repository
+        const [latestReview] = await db
+          .select()
+          .from(reviewsTable)
+          .where(eq(reviewsTable.repositoryName, r.name))
+          .orderBy(desc(reviewsTable.reviewedAt))
+          .limit(1);
+
+        return {
+          id: r.id,
+          name: r.name,
+          fullName: r.full_name,
+          language: r.language || "TypeScript", // Fallback if GitHub doesn't detect a language
+          stars: r.stargazers_count || 0,
+          openPrs: r.open_issues_count || 0, // Using issues + PRs count as openPRs mapping
+          lastReviewedAt: latestReview ? formatReviewedAt(latestReview.reviewedAt) : null,
+          reviewScore: latestReview ? parseFloat(latestReview.qualityScore) : null,
+          description: r.description || "",
+          isPrivate: r.private,
+        };
+      })
+    );
+
+    res.json(result);
+  } catch (err: any) {
+    req.log?.error(err, "Failed to list repositories from GitHub");
+    
+    if (err.code === "GITHUB_TOKEN_EXPIRED") {
+      res.status(401).json({ error: "github_token_expired", message: err.message });
+      return;
+    }
+    
+    res.status(err.status || 500).json({
+      error: "Failed to fetch repositories",
+      detail: err.message,
+    });
   }
-  if (search) {
-    const q = search.toLowerCase();
-    rows = rows.filter((r) => r.name.toLowerCase().includes(q) || r.fullName.toLowerCase().includes(q));
-  }
-
-  const result = rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    fullName: r.fullName,
-    language: r.language,
-    stars: r.stars,
-    openPrs: r.openPrs,
-    lastReviewedAt: r.lastReviewedAt,
-    reviewScore: r.reviewScore ? parseFloat(r.reviewScore) : null,
-    description: r.description,
-    isPrivate: r.isPrivate,
-  }));
-
-  res.json(result);
 });
 
-router.get("/repositories/:id", async (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+router.get("/repositories/:id", requireGitHubToken as any, async (req: AuthenticatedRequest, res) => {
+  const id = parseInt(req.params.id as string, 10);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid repository ID" });
+    return;
+  }
 
-  const [row] = await db.select().from(repositoriesTable).where(eq(repositoriesTable.id, id));
-  if (!row) return res.status(404).json({ error: "Not found" });
+  const token = req.githubToken!;
 
-  res.json({
-    id: row.id,
-    name: row.name,
-    fullName: row.fullName,
-    language: row.language,
-    stars: row.stars,
-    openPrs: row.openPrs,
-    lastReviewedAt: row.lastReviewedAt,
-    reviewScore: row.reviewScore ? parseFloat(row.reviewScore) : null,
-    description: row.description,
-    isPrivate: row.isPrivate,
-  });
+  try {
+    const r = await getRepositoryById(token, id);
+
+    const [latestReview] = await db
+      .select()
+      .from(reviewsTable)
+      .where(eq(reviewsTable.repositoryName, r.name))
+      .orderBy(desc(reviewsTable.reviewedAt))
+      .limit(1);
+
+    res.json({
+      id: r.id,
+      name: r.name,
+      fullName: r.full_name,
+      language: r.language || "TypeScript",
+      stars: r.stargazers_count || 0,
+      openPrs: r.open_issues_count || 0,
+      lastReviewedAt: latestReview ? formatReviewedAt(latestReview.reviewedAt) : null,
+      reviewScore: latestReview ? parseFloat(latestReview.qualityScore) : null,
+      description: r.description || "",
+      isPrivate: r.private,
+    });
+  } catch (err: any) {
+    req.log?.error(err, `Failed to get repository details for ID ${id}`);
+    
+    if (err.code === "GITHUB_TOKEN_EXPIRED") {
+      res.status(401).json({ error: "github_token_expired", message: err.message });
+      return;
+    }
+    
+    res.status(err.status || 500).json({
+      error: "Failed to fetch repository details",
+      detail: err.message,
+    });
+  }
 });
 
 export default router;
+
