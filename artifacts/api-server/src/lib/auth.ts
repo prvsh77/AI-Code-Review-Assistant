@@ -1,8 +1,19 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || "dev_access_secret_default_super_secure_key";
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "dev_refresh_secret_default_super_secure_key";
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || (() => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("JWT_ACCESS_SECRET environment variable is required in production mode");
+  }
+  return "dev_access_secret_default_super_secure_key";
+})();
+
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || (() => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("JWT_REFRESH_SECRET environment variable is required in production mode");
+  }
+  return "dev_refresh_secret_default_super_secure_key";
+})();
 
 export interface TokenPayload {
   userId: number;

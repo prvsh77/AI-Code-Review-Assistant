@@ -389,14 +389,17 @@ router.get("/auth/github/url", (req, res) => {
   } catch (err) {
     console.error(err);
 
+    const isProduction = process.env.NODE_ENV === "production";
     return res.status(500).json({
       error: err instanceof Error ? err.message : String(err),
-      stack: err instanceof Error ? err.stack : "",
-      env: {
-        PUBLIC_API_URL: process.env.PUBLIC_API_URL,
-        GITHUB_CLIENT_ID: !!process.env.GITHUB_CLIENT_ID,
-        NODE_ENV: process.env.NODE_ENV,
-      },
+      ...(isProduction ? {} : {
+        stack: err instanceof Error ? err.stack : "",
+        env: {
+          PUBLIC_API_URL: process.env.PUBLIC_API_URL,
+          GITHUB_CLIENT_ID: !!process.env.GITHUB_CLIENT_ID,
+          NODE_ENV: process.env.NODE_ENV,
+        },
+      }),
     });
   }
 });

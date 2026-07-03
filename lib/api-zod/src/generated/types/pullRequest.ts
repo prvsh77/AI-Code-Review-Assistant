@@ -22,5 +22,9 @@ export interface PullRequest {
   status: PullRequestStatus;
   /** @nullable */
   reviewStatus?: PullRequestReviewStatus;
+  /** @nullable */
+  sourceBranch?: string | null;
+  /** @nullable */
+  targetBranch?: string | null;
   createdAt: string;
 }

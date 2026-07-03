@@ -185,6 +185,8 @@ export const ListPullRequestsResponseItem = zod.object({
   "commits": zod.number(),
   "status": zod.enum(['open', 'closed', 'merged']),
   "reviewStatus": zod.union([zod.literal('pending'),zod.literal('analyzing'),zod.literal('completed'),zod.literal(null)]).nullish(),
+  "sourceBranch": zod.string().nullish(),
+  "targetBranch": zod.string().nullish(),
   "createdAt": zod.string()
 })
 export const ListPullRequestsResponse = zod.array(ListPullRequestsResponseItem)
@@ -209,6 +211,8 @@ export const GetPullRequestResponse = zod.object({
   "commits": zod.number(),
   "status": zod.enum(['open', 'closed', 'merged']),
   "reviewStatus": zod.union([zod.literal('pending'),zod.literal('analyzing'),zod.literal('completed'),zod.literal(null)]).nullish(),
+  "sourceBranch": zod.string().nullish(),
+  "targetBranch": zod.string().nullish(),
   "createdAt": zod.string()
 })
 

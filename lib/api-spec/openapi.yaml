@@ -538,6 +538,10 @@ components:
         reviewStatus:
           type: ["string", "null"]
           enum: [pending, analyzing, completed, null]
+        sourceBranch:
+          type: ["string", "null"]
+        targetBranch:
+          type: ["string", "null"]
         createdAt:
           type: string
 

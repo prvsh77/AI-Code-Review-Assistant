@@ -85,6 +85,8 @@ router.get("/pull-requests", requireGitHubToken as any, async (req: Authenticate
           commits: pr.commits || 1,
           status: pr.state === "open" ? ("open" as const) : pr.merged_at ? ("merged" as const) : ("closed" as const),
           reviewStatus,
+          sourceBranch: pr.head?.ref || "main",
+          targetBranch: pr.base?.ref || "main",
         };
 
         // Cache the PR details in local DB so we can resolve details in trigger-review
@@ -99,6 +101,8 @@ router.get("/pull-requests", requireGitHubToken as any, async (req: Authenticate
               filesChanged: prData.filesChanged,
               commits: prData.commits,
               reviewStatus: prData.reviewStatus,
+              sourceBranch: prData.sourceBranch,
+              targetBranch: prData.targetBranch,
             },
           });
 
@@ -151,6 +155,8 @@ router.get("/pull-requests/:id", requireGitHubToken as any, async (req: Authenti
       commits: row.commits,
       status: row.status,
       reviewStatus: row.reviewStatus,
+      sourceBranch: row.sourceBranch,
+      targetBranch: row.targetBranch,
       createdAt: row.createdAt.toISOString(),
     });
   } catch (err: any) {
@@ -207,6 +213,7 @@ router.post("/pull-requests/:id/trigger-review", requireGitHubToken as any, asyn
         { name: "Security Agent", status: "waiting" as const, progress: null },
         { name: "Complexity Agent", status: "waiting" as const, progress: null },
         { name: "Documentation Agent", status: "waiting" as const, progress: null },
+        { name: "Refactoring Agent", status: "waiting" as const, progress: null },
       ],
     };
     activeJobs.set(jobId, job);
@@ -432,13 +439,22 @@ async function runBackgroundReview(
       agents[2].progress = 100;
       agents[3].status = "running";
       agents[3].progress = 50;
-      job.progress = Math.round((fIdx / filesToReview.length) * 100) + 24;
+      job.progress = Math.round((fIdx / filesToReview.length) * 100) + 20;
       activeJobs.set(jobId, { ...job });
       await sleep(500);
 
-      // Complete Documentation
+      // Complete Documentation, run Refactoring
       agents[3].status = "completed";
       agents[3].progress = 100;
+      agents[4].status = "running";
+      agents[4].progress = 50;
+      job.progress = Math.round((fIdx / filesToReview.length) * 100) + 26;
+      activeJobs.set(jobId, { ...job });
+      await sleep(500);
+
+      // Complete Refactoring
+      agents[4].status = "completed";
+      agents[4].progress = 100;
     }
 
     job.progress = 95;

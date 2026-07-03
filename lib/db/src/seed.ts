@@ -98,6 +98,8 @@ async function main() {
       commits: 2,
       status: "open",
       reviewStatus: "completed",
+      sourceBranch: "feature/payment-retry",
+      targetBranch: "main",
     },
     {
       number: 102,
@@ -110,6 +112,8 @@ async function main() {
       commits: 1,
       status: "open",
       reviewStatus: "completed",
+      sourceBranch: "feature/jwt-auth",
+      targetBranch: "main",
     },
     {
       number: 103,
@@ -122,6 +126,8 @@ async function main() {
       commits: 4,
       status: "open",
       reviewStatus: "pending",
+      sourceBranch: "fix/charts-bundle",
+      targetBranch: "develop",
     },
   ]).returning();
 

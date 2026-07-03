@@ -14,6 +14,8 @@ export const pullRequestsTable = pgTable("pull_requests", {
   commits: integer("commits").notNull().default(1),
   status: text("status").notNull().default("open"),
   reviewStatus: text("review_status"),
+  sourceBranch: text("source_branch"),
+  targetBranch: text("target_branch"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

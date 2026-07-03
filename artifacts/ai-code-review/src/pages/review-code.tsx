@@ -10,12 +10,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { normalizeArray } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ReviewCode() {
   const { id } = useParams<{ id: string }>();
   const reviewId = Number(id);
   const searchParams = new URLSearchParams(window.location.search);
   const initialFile = searchParams.get("file");
+  const { toast } = useToast();
 
   const { data: files, isLoading: filesLoading } = useGetReviewFiles(reviewId, { query: { queryKey: getGetReviewFilesQueryKey(reviewId) } });
   const { data: comments, isLoading: commentsLoading } = useGetReviewComments(reviewId, { query: { queryKey: getGetReviewCommentsQueryKey(reviewId) } });
@@ -25,6 +27,26 @@ export default function ReviewCode() {
 
   const [selectedFile, setSelectedFile] = useState<string | null>(initialFile || null);
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
+  const [acceptedComments, setAcceptedComments] = useState<Record<number, boolean>>({});
+  const [ignoredComments, setIgnoredComments] = useState<Record<number, boolean>>({});
+
+  const handleAcceptComment = (commentId: number, line: number) => {
+    setAcceptedComments(prev => ({ ...prev, [commentId]: true }));
+    setIgnoredComments(prev => ({ ...prev, [commentId]: false }));
+    toast({
+      title: "Suggestion Accepted",
+      description: `Line ${line} suggestion has been accepted.`,
+    });
+  };
+
+  const handleIgnoreComment = (commentId: number, line: number) => {
+    setIgnoredComments(prev => ({ ...prev, [commentId]: true }));
+    setAcceptedComments(prev => ({ ...prev, [commentId]: false }));
+    toast({
+      title: "Suggestion Ignored",
+      description: `Line ${line} suggestion has been ignored.`,
+    });
+  };
 
   // If no file selected but files loaded, select first file
   useMemo(() => {
@@ -144,28 +166,45 @@ export default function ReviewCode() {
                     codeLines.map((lineText: string, idx: number) => {
                       const lineNum = idx + 1;
                       const lineComment = currentFileComments.find(c => c && c.line === lineNum);
+                      const isCommentAccepted = lineComment && acceptedComments[lineComment.id];
+                      const isCommentIgnored = lineComment && ignoredComments[lineComment.id];
                       const isSelected = selectedLine === lineNum;
+
+                      let lineClass = 'hover:bg-[#21262d]/50 cursor-text';
+                      if (isSelected) {
+                        lineClass = 'bg-primary/15';
+                      } else if (lineComment) {
+                        if (isCommentAccepted) {
+                          lineClass = 'bg-green-500/10 hover:bg-green-500/15 cursor-pointer';
+                        } else if (isCommentIgnored) {
+                          lineClass = 'hover:bg-[#21262d]/50 cursor-text opacity-60';
+                        } else {
+                          lineClass = 'bg-red-500/10 hover:bg-red-500/15 cursor-pointer';
+                        }
+                      }
 
                       return (
                         <div 
                           key={lineNum}
                           onClick={() => lineComment && setSelectedLine(lineNum)}
-                          className={`flex group pr-4 transition-colors ${
-                            isSelected 
-                              ? 'bg-primary/15' 
-                              : lineComment 
-                                ? 'bg-red-500/10 hover:bg-red-500/15 cursor-pointer' 
-                                : 'hover:bg-[#21262d]/50 cursor-text'
-                          }`}
+                          className={`flex group pr-4 transition-colors ${lineClass}`}
                         >
                           <div className={`w-12 flex-shrink-0 text-right pr-4 select-none border-r-2 flex items-center justify-end gap-1 relative ${
                             isSelected 
                               ? 'text-primary border-primary' 
                               : lineComment 
-                                ? 'text-red-400 border-red-500/50 group-hover:border-red-500' 
+                                ? isCommentAccepted
+                                  ? 'text-green-400 border-green-500/50 group-hover:border-green-500'
+                                  : isCommentIgnored
+                                    ? 'text-[#6e7681] border-transparent'
+                                    : 'text-red-400 border-red-500/50 group-hover:border-red-500'
                                 : 'text-[#6e7681] border-transparent'
                           }`}>
-                            {lineComment && <ShieldAlert className="h-3 w-3 text-red-500 absolute left-1" />}
+                            {lineComment && !isCommentIgnored && (
+                              isCommentAccepted 
+                                ? <Check className="h-3.5 w-3.5 text-green-500 absolute left-1" />
+                                : <ShieldAlert className="h-3 w-3 text-red-500 absolute left-1" />
+                            )}
                             {lineNum}
                           </div>
                           <div className="pl-4 flex-1 whitespace-pre select-text">
@@ -209,47 +248,90 @@ export default function ReviewCode() {
               ) : (
                 <div className="p-4 space-y-4">
                   <AnimatePresence>
-                    {currentFileComments.map(comment => (
-                      <motion.div 
-                        key={comment.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className={`rounded-xl bg-card border overflow-hidden shadow-sm transition-colors ${selectedLine === comment.line ? 'border-primary shadow-[0_0_15px_rgba(0,188,212,0.15)] ring-1 ring-primary' : 'border-border hover:border-border/80'}`}
-                        onClick={() => setSelectedLine(comment.line)}
-                      >
-                        <div className="px-3 py-2 border-b border-border/50 flex justify-between items-center bg-muted/10">
-                          <div className="flex items-center gap-2">
-                            {getSeverityIcon(comment.severity)}
-                            <span className="font-mono text-[10px] text-muted-foreground font-semibold">L{comment.line}</span>
-                          </div>
-                          {getSeverityBadge(comment.severity)}
-                        </div>
-                        <div className="p-3 text-[13px] space-y-3">
-                          <p className="text-foreground/90 leading-relaxed font-medium">{comment.message}</p>
-                          
-                          {comment.suggestion && (
-                            <div className="rounded-md overflow-hidden border border-green-500/20 bg-green-500/5">
-                              <div className="bg-green-500/10 px-2 py-1 flex items-center gap-1.5 border-b border-green-500/10">
-                                <Code2 className="h-3 w-3 text-green-500" />
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-green-500">Suggested Fix</span>
-                              </div>
-                              <div className="p-2 font-mono text-[11px] text-[#e6edf3] bg-[#0d1117] overflow-x-auto whitespace-pre">
-                                {comment.suggestion}
-                              </div>
+                    {currentFileComments.map(comment => {
+                      const isAccepted = acceptedComments[comment.id];
+                      const isIgnored = ignoredComments[comment.id];
+
+                      let cardBorderClass = selectedLine === comment.line
+                        ? 'border-primary shadow-[0_0_15px_rgba(0,188,212,0.15)] ring-1 ring-primary'
+                        : isAccepted
+                          ? 'border-green-500/50 bg-green-500/5'
+                          : isIgnored
+                            ? 'border-border/40 opacity-60'
+                            : 'border-border hover:border-border/80';
+
+                      return (
+                        <motion.div 
+                          key={comment.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className={`rounded-xl bg-card border overflow-hidden shadow-sm transition-colors ${cardBorderClass}`}
+                          onClick={() => setSelectedLine(comment.line)}
+                        >
+                          <div className="px-3 py-2 border-b border-border/50 flex justify-between items-center bg-muted/10">
+                            <div className="flex items-center gap-2">
+                              {isAccepted ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : isIgnored ? (
+                                <XCircle className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                getSeverityIcon(comment.severity)
+                              )}
+                              <span className="font-mono text-[10px] text-muted-foreground font-semibold">L{comment.line}</span>
                             </div>
-                          )}
-                          
-                          <div className="flex gap-2 pt-2 border-t border-border/50">
-                            <Button size="sm" variant="ghost" className="flex-1 h-7 text-[11px] text-green-500 hover:text-green-400 hover:bg-green-500/10 bg-green-500/5 border border-transparent hover:border-green-500/20">
-                              <CheckCircle2 className="h-3 w-3 mr-1.5" /> Accept
-                            </Button>
-                            <Button size="sm" variant="ghost" className="flex-1 h-7 text-[11px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20">
-                              <XCircle className="h-3 w-3 mr-1.5" /> Ignore
-                            </Button>
+                            {isAccepted ? (
+                              <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 uppercase tracking-wider text-[10px]">Accepted</Badge>
+                            ) : isIgnored ? (
+                              <Badge variant="outline" className="bg-muted text-muted-foreground border-border/20 uppercase tracking-wider text-[10px]">Ignored</Badge>
+                            ) : (
+                              getSeverityBadge(comment.severity)
+                            )}
                           </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                          <div className="p-3 text-[13px] space-y-3">
+                            <p className="text-foreground/90 leading-relaxed font-medium">{comment.message}</p>
+                            
+                            {comment.suggestion && (
+                              <div className="rounded-md overflow-hidden border border-green-500/20 bg-green-500/5">
+                                <div className="bg-green-500/10 px-2 py-1 flex items-center gap-1.5 border-b border-green-500/10">
+                                  <Code2 className="h-3 w-3 text-green-500" />
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-green-500">Suggested Fix</span>
+                                </div>
+                                <div className="p-2 font-mono text-[11px] text-[#e6edf3] bg-[#0d1117] overflow-x-auto whitespace-pre">
+                                  {comment.suggestion}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {!isAccepted && !isIgnored && (
+                              <div className="flex gap-2 pt-2 border-t border-border/50">
+                                <Button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAcceptComment(comment.id, comment.line);
+                                  }}
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="flex-1 h-7 text-[11px] text-green-500 hover:text-green-400 hover:bg-green-500/10 bg-green-500/5 border border-transparent hover:border-green-500/20"
+                                >
+                                  <CheckCircle2 className="h-3 w-3 mr-1.5" /> Accept
+                                </Button>
+                                <Button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleIgnoreComment(comment.id, comment.line);
+                                  }}
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="flex-1 h-7 text-[11px] text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20"
+                                >
+                                  <XCircle className="h-3 w-3 mr-1.5" /> Ignore
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </AnimatePresence>
                 </div>
               )}

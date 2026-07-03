@@ -2,7 +2,12 @@ import crypto from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
 // Generate a 32-byte key from the environment variable or default fallback
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || "dev_encryption_key_default_12345_abc";
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || (() => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("ENCRYPTION_KEY environment variable is required in production mode");
+  }
+  return "dev_encryption_key_default_12345_abc";
+})();
 const KEY = crypto.scryptSync(ENCRYPTION_KEY, "salt", 32);
 
 /**

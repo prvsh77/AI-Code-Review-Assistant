@@ -266,6 +266,8 @@ export async function listPullRequests(token: string, owner: string, repo: strin
         user: { login: "mockuser", avatar_url: "https://avatars.githubusercontent.com/u/9919?v=4" },
         changed_files: 2,
         commits: 1,
+        head: { ref: "feature/openai-settings" },
+        base: { ref: "main" },
       },
       {
         id: 102,
@@ -277,6 +279,8 @@ export async function listPullRequests(token: string, owner: string, repo: strin
         user: { login: "john_doe", avatar_url: "https://avatars.githubusercontent.com/u/9920?v=4" },
         changed_files: 1,
         commits: 2,
+        head: { ref: "fix/job-memory-leak" },
+        base: { ref: "main" },
       },
       {
         id: 103,
@@ -288,6 +292,8 @@ export async function listPullRequests(token: string, owner: string, repo: strin
         user: { login: "mockuser", avatar_url: "https://avatars.githubusercontent.com/u/9919?v=4" },
         changed_files: 3,
         commits: 4,
+        head: { ref: "refactor/auth-middleware" },
+        base: { ref: "main" },
       }
     ];
 
