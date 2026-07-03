@@ -372,12 +372,11 @@ router.get("/auth/github/url", (req, res) => {
       });
     }
 
-    const backendUrl =
-      process.env.PUBLIC_API_URL ||
-      `${req.protocol}://${req.get("host")}`;
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      "https://ai-code-review-assistant-2-qbjh.onrender.com";
 
-    const redirectUri = `${backendUrl}/api/auth/github/callback`;
-
+    const redirectUri = `${frontendUrl}/auth/github/callback`;
     const url = new URL("https://github.com/login/oauth/authorize");
 
     url.searchParams.set("client_id", clientId);
