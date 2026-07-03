@@ -10,7 +10,11 @@ export function GitHubEmptyState() {
   const handleConnect = async () => {
     setConnecting(true);
     try {
-      const res = await fetch(`/api/auth/github/url?origin=${window.location.origin}`);
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const res = await fetch(
+        `${API_URL}/api/auth/github/url?origin=${encodeURIComponent(window.location.origin)}`
+      );
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
