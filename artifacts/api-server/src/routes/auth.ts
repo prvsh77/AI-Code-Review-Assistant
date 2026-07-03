@@ -363,30 +363,43 @@ router.post("/auth/github", loginLimiter, async (req, res) => {
 });
 
 router.get("/auth/github/url", (req, res) => {
-  const clientId = process.env.GITHUB_CLIENT_ID;
+  try {
+    const clientId = process.env.GITHUB_CLIENT_ID;
 
-  if (!clientId) {
+    if (!clientId) {
+      return res.status(500).json({
+        error: "GITHUB_CLIENT_ID missing",
+      });
+    }
+
+    const backendUrl =
+      process.env.PUBLIC_API_URL ||
+      `${req.protocol}://${req.get("host")}`;
+
+    const redirectUri = `${backendUrl}/api/auth/github/callback`;
+
+    const url = new URL("https://github.com/login/oauth/authorize");
+
+    url.searchParams.set("client_id", clientId);
+    url.searchParams.set("scope", "repo,user");
+    url.searchParams.set("redirect_uri", redirectUri);
+
+    return res.json({
+      url: url.toString(),
+    });
+  } catch (err) {
+    console.error(err);
+
     return res.status(500).json({
-      error: "GITHUB_CLIENT_ID not configured",
+      error: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : "",
+      env: {
+        PUBLIC_API_URL: process.env.PUBLIC_API_URL,
+        GITHUB_CLIENT_ID: !!process.env.GITHUB_CLIENT_ID,
+        NODE_ENV: process.env.NODE_ENV,
+      },
     });
   }
-
-  // Public URL of your backend
-  const backendUrl =
-    process.env.PUBLIC_API_URL ||
-    `${req.protocol}://${req.get("host")}`;
-
-  const redirectUri = `${backendUrl}/api/auth/github/callback`;
-
-  const url = new URL("https://github.com/login/oauth/authorize");
-
-  url.searchParams.set("client_id", clientId);
-  url.searchParams.set("scope", "repo,user");
-  url.searchParams.set("redirect_uri", redirectUri);
-
-  res.json({
-    url: url.toString(),
-  });
 });
 
 export default router;
