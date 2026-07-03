@@ -1,8 +1,10 @@
 services:
-  - type: static
+  - type: web
+    runtime: static
     name: AI-Code-Review-Assistant-2
+
     buildCommand: pnpm install && pnpm --filter @workspace/ai-code-review build
-    publishPath: artifacts/ai-code-review/dist/public
+    staticPublishPath: artifacts/ai-code-review/dist/public
 
     routes:
       - type: rewrite
